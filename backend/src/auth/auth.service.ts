@@ -30,7 +30,6 @@ export class AuthService {
 
     return await this.usersService.createUser(
       email,
-	  phoneno,
       hashedPassword,
     );
   }
