@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KYC Review</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .preview-box {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fafafa;
+    }
+
+    .preview-box img {
+      width: 100%;
+      display: block;
+    }
+
+    .preview-label {
+      padding: 10px;
+      font-size: 14px;
+      background: #f9fafb;
+      border-top: 1px solid #eee;
+    }
+
+    .status-box {
+      padding: 14px;
+      border-radius: 10px;
+      background: #eef2ff;
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #4f46e5;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .btn:hover {
+      background: #4338ca;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 15px;
+      color: #555;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+
+  <div class="card">
+    <h2>Verification Checks</h2>
+
+    <div id="faceStatus" class="status-box">
+      Waiting for face verification...
+    </div>
+
+    <div id="ocrStatus" class="status-box">
+      Waiting for OCR extraction...
+    </div>
+
+    <div id="livenessStatus" class="status-box">
+      Waiting for liveness validation...
+    </div>
+
+    <div id="finalStatus" class="status-box warning">
+      Verification in progress...
+    </div>
+
+    <button class="btn" onclick="startVerification()">
+      Start Background Verification
+    </button>
+  </div>
+
+</div>
+
+<script>
+
+  // TEMP PREVIEW PLACEHOLDER
+  // Later load real images from backend
+
+  document.getElementById('selfieImage').src =
+    'https://placehold.co/400x250?text=Selfie';
+
+  document.getElementById('frontImage').src =
+    'https://placehold.co/400x250?text=Document+Front';
+
+  document.getElementById('backImage').src =
+    'https://placehold.co/400x250?text=Document+Back';
+
+  async function startVerification() {
+
+    const faceStatus = document.getElementById('faceStatus');
+    const ocrStatus = document.getElementById('ocrStatus');
+    const livenessStatus = document.getElementById('livenessStatus');
+    const finalStatus = document.getElementById('finalStatus');
+
+    finalStatus.className = 'status-box warning';
+    finalStatus.innerText = 'Running verification checks...';
+
+    // 🔹 Simulate Face Match
+    faceStatus.innerText = 'Running face comparison...';
+
+    await delay(1500);
+
+    faceStatus.className = 'status-box success';
+    faceStatus.innerText =
+      'Face verification passed (94% similarity)';
+
+    // 🔹 Simulate OCR
+    ocrStatus.innerText = 'Extracting document information...';
+
+    await delay(1500);
+
+    ocrStatus.className = 'status-box success';
+    ocrStatus.innerText =
+      'Document OCR extraction completed';
+
+    //  Simulate Liveness
+    livenessStatus.innerText = 'Checking liveness result...';
+
+    await delay(1200);
+
+    livenessStatus.className = 'status-box success';
+    livenessStatus.innerText =
+      'Liveness verification passed';
+
+    //  Final
+    finalStatus.className = 'status-box success';
+    finalStatus.innerText =
+      'KYC verification completed successfully ✔';
+
+
+      window.location.href = 'http://localhost:3001/register';
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+</script>
+
+</body>
+</html>

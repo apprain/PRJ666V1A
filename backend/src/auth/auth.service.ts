@@ -14,7 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string) {
+  async register(email: string, phoneno: string, password: string) {
 
     const existingUser =
       await this.usersService.findByEmail(email);
@@ -30,6 +30,7 @@ export class AuthService {
 
     return await this.usersService.createUser(
       email,
+	  phoneno,
       hashedPassword,
     );
   }

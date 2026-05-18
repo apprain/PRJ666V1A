@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
+  const [phoneno, setPhoneno] = useState('');
   const [password, setPassword] = useState('');
 
   async function handleRegister(e: React.FormEvent) {
@@ -14,7 +15,7 @@ export default function RegisterPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ phoneno,email, password }),
     });
 
     const data = await res.json();
@@ -28,7 +29,7 @@ export default function RegisterPage() {
         onSubmit={handleRegister}
         className="w-full max-w-sm rounded-lg bg-white p-6 shadow"
       >
-        <h1 className="mb-4 text-2xl font-bold">Register</h1>
+        <h1 className="mb-4 text-2xl font-bold">Individual's Register</h1>
 
         <input
           className="mb-3 w-full rounded border p-2"
@@ -36,6 +37,14 @@ export default function RegisterPage() {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          className="mb-3 w-full rounded border p-2"
+          type="phoneno"
+          placeholder="Phone Number"
+          value={phoneno}
+          onChange={(e) => setPhoneno(e.target.value)}
         />
 
         <input
