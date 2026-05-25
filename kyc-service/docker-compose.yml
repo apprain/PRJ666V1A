@@ -19,5 +19,30 @@ services:
     volumes:
       - minio_data:/data
 
+  frontend:
+    build: .
+    container_name: task-frontend
+    restart: always
+
+    ports:
+      - "4000:4000"
+
+    command: npm run start:dev
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    environment:
+      - PORT=4000
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password123
+      - MINIO_BUCKET=kyc-private
+
+    depends_on:
+      - minio
+
 volumes:
   minio_data:

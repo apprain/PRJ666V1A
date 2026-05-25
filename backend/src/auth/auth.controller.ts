@@ -9,10 +9,18 @@ export class AuthController {
   @Post('register')
   register(
     @Body('email') email: string,
-    @Body('phoneno') phoneno: string,
     @Body('password') password: string,
   ) {
-    return this.authService.register(email,phoneno, password);
+    return this.authService.register(email, password);
+  }
+
+  @Post('corp-register')
+  corpregister(
+    @Body('email') email: string,
+    @Body('password') password: string,
+    @Body('organizationname') organizationname: string,
+  ) {
+    return this.authService.corpregister(email, password, organizationname);
   }
 
   @Post('login')
@@ -21,5 +29,13 @@ export class AuthController {
     @Body('password') password: string,
   ) {
     return this.authService.login(email, password);
+  }
+
+  @Post('corp-login')
+  corplogin(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
+    return this.authService.corplogin(email, password);
   }
 }

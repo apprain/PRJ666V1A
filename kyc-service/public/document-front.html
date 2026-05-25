@@ -1,83 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Capture Document Front</title>
 
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
       background: #f3f4f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      width: 100vw;
+      min-height: 100vh;
     }
 
     .card {
+      width: 100%;
+      min-height: 100vh;
       background: white;
-      padding: 20px;
-      border-radius: 16px;
-      width: 360px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      text-align: center;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
     }
 
     h2 {
-      font-size: 18px;
-      margin-bottom: 10px;
+      text-align: center;
+      font-size: 22px;
+      margin: 10px 0 14px;
+      color: #111827;
     }
 
     .video-box {
+      width: 100%;
+      max-width: 520px;
+      height: 55vh;
+      margin: 0 auto;
       position: relative;
-      border-radius: 12px;
+      border-radius: 18px;
       overflow: hidden;
       border: 2px solid #ddd;
-      background: #000;
+      background: black;
     }
 
     video {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
     }
 
     .guide {
       position: absolute;
-      left: 8%;
-      top: 25%;
-      width: 84%;
-      height: 50%;
+      left: 6%;
+      top: 28%;
+      width: 88%;
+      height: 44%;
       border: 3px dashed #22c55e;
-      border-radius: 10px;
-      box-sizing: border-box;
+      border-radius: 12px;
       pointer-events: none;
     }
 
     canvas {
       width: 100%;
-      margin-top: 10px;
-      border-radius: 12px;
+      max-width: 520px;
+      height: 150px;
+      margin: 14px auto 0;
+      display: block;
+      border-radius: 14px;
       border: 2px dashed #ccc;
       background: #fafafa;
     }
 
     .status {
-      margin-top: 10px;
-      font-size: 14px;
-      padding: 8px;
-      border-radius: 8px;
+      width: 100%;
+      max-width: 520px;
+      margin: 12px auto 0;
+      padding: 12px;
+      border-radius: 12px;
       background: #eef2ff;
-      color: #333;
+      text-align: center;
+      font-size: 15px;
+      color: #111827;
     }
 
     .btn {
-      margin-top: 12px;
-      padding: 10px;
       width: 100%;
+      max-width: 520px;
+      margin: 14px auto 0;
+      padding: 14px;
       border: none;
-      border-radius: 10px;
-      font-size: 15px;
+      border-radius: 14px;
+      font-size: 16px;
       cursor: pointer;
       background: #4f46e5;
       color: white;
@@ -86,6 +104,7 @@
     .btn.secondary {
       background: #e5e7eb;
       color: #333;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -100,11 +119,11 @@
     <div class="guide"></div>
   </div>
 
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" style="display:none"></canvas>
 
   <div id="status" class="status">Starting camera...</div>
 
-  <button class="btn" onclick="captureDocumentFront()">Capture Front</button>
+  <button class="btn" onclick="captureDocumentFront()" >Capture Front</button>
   <button class="btn secondary" onclick="resetCapture()">Retry</button>
 </div>
 
@@ -166,7 +185,10 @@
     .then(data => {
       console.log('Document front upload success:', data);
       statusText.innerText = "Document front uploaded successfully";
-      window.location.href = '/document-back.html';
+
+      setTimeout(() => {
+        window.location.href = '/document-back.html';
+      }, 800);
     })
     .catch(err => {
       console.error(err);
@@ -177,8 +199,10 @@
 
   function resetCapture() {
     captured = false;
+
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     statusText.innerText = "Place document front inside the box";
   }
 

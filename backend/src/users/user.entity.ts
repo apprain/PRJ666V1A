@@ -9,9 +9,9 @@ export class User {
   @Column()
   email!: string;
   
-  @Column({ unique: true })
-  phoneno!: string;
-
   @Column()
   password!: string;
+
+  @Column({ nullable: true })
+  organizationname!: string;
 }

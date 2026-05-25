@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { TasksModule } from './tasks/tasks.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { StatementSharesModule } from './statement-shares/statement-shares.module';
 
 
 
@@ -39,6 +40,8 @@ import { UsersModule } from './users/users.module';
     AuthModule,
 
     UsersModule,
+
+    StatementSharesModule,
   ],
 
   controllers: [AppController],

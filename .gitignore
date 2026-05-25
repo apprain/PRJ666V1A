@@ -3,5 +3,8 @@ vendor/
 .next/
 dist/
 build/
-.env
 *.csv
+
+*.pem
+*.key
+*.crt

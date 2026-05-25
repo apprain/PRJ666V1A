@@ -2,154 +2,152 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <!DOCTYPE html>
-  <html lang="en">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <head>
-    <meta charset="UTF-8">
-    <title>KYC Liveness</title>
+  <title>KYC Liveness</title>
 
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial;
-        background: #f3f4f6;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
+  <style>
+   * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-      .card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        width: 350px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        text-align: center;
-      }
+body {
+  font-family: Arial, sans-serif;
+  background: #f3f4f6;
+  width: 100vw;
+  min-height: 100vh;
+}
 
-      h2 {
-        margin-bottom: 15px;
-        font-size: 18px;
-      }
+.card {
+  width: 100%;
+  min-height: 100vh;
+  background: white;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
 
-      .video-box {
-        position: relative;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid #ddd;
-      }
+h2 {
+  text-align: center;
+  font-size: 22px;
+  margin: 10px 0 14px;
+}
 
-      video {
-        width: 100%;
-        height: auto;
-        display: block;
-      }
+.video-box {
+  width: 100%;
+  max-width: 420px;
+  height: 60vh;
+  margin: 0 auto;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid #ddd;
+  background: black;
+}
 
-      canvas {
-        width: 100%;
-        margin-top: 10px;
-        border-radius: 12px;
-        border: 2px dashed #ccc;
-        background: #fafafa;
-      }
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-      .status {
-        margin-top: 10px;
-        font-size: 14px;
-        padding: 8px;
-        border-radius: 8px;
-        background: #eef2ff;
-        color: #333;
-      }
+canvas {
 
-      .btn {
-        margin-top: 12px;
-        padding: 10px;
-        width: 100%;
-        border: none;
-        border-radius: 10px;
-        font-size: 15px;
-        cursor: pointer;
-        background: #4f46e5;
-        color: white;
-        transition: 0.2s;
-      }
+  width: 100%;
+  max-width: 420px;
+  height: 160px;
+  margin: 14px auto 0;
+  display: block;
+  border-radius: 14px;
+  border: 2px dashed #ccc;
+  background: #fafafa;
+}
 
-      .btn:hover {
-        background: #4338ca;
-      }
+.status,#badge {
+  width: 100%;
+  max-width: 420px;
+  margin: 12px auto 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  text-align: center;
+}
 
-      .btn.secondary {
-        background: #e5e7eb;
-        color: #333;
-      }
 
-      .btn.secondary:hover {
-        background: #d1d5db;
-      }
-
-      .badge {
-        display: inline-block;
-        margin-top: 8px;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        background: #d1fae5;
-        color: #065f46;
-      }
-    </style>
-  </head>
+.btn {
+  width: 100%;
+  max-width: 420px;
+  margin: 14px auto 0;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: #4f46e5;
+  color: white;
+  font-size: 16px;
+}
+  </style>
+</head>
 
 <body>
 
   <div class="card">
+
     <h2>KYC Liveness Check</h2>
 
     <div class="video-box">
       <video id="video" autoplay muted playsinline></video>
     </div>
 
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" style="  display:none;"></canvas>
 
-    <div id="status" class="status">Initializing...</div>
+    <div id="status" class="status">
+      Initializing...
+    </div>
 
-    <div id="badge" class="badge" style="display:none;">Verified</div>
+    <div id="badge" class="badge">
+      Verified
+    </div>
 
-    <button class="btn" onclick="resetCapture()">Retry</button>
+    <button class="btn" onclick="resetCapture()">
+      Retry
+    </button>
+
   </div>
 
-  <!-- KEEP YOUR JS SAME -->
   <script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
   <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const statusText = document.getElementById('status');
+    const badge = document.getElementById('badge');
 
-    // Config
     const EAR_THRESHOLD = 0.3;
+
     let blinkFrames = 0;
     let blinkDetected = false;
     let captured = false;
 
-    // Load Models
     async function loadModels() {
+
       await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+
       await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+
       statusText.innerText = "Models loaded. Starting camera...";
     }
 
-    // Start Camera
     async function startVideo() {
+
       try {
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: "user",
-            width: { ideal: 320 },
-            height: { ideal: 240 }
+            width: { ideal: 720 },
+            height: { ideal: 1280 }
           },
           audio: false
         });
@@ -164,23 +162,29 @@
         });
 
         statusText.innerText = "Look straight and blink slowly";
+
       } catch (e) {
+
         console.error(e);
+
         statusText.innerText = "Camera access failed";
       }
     }
 
-    // Eye ratio
     function getEyeAspectRatio(eye) {
-      const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+      const dist = (a, b) =>
+        Math.hypot(a.x - b.x, a.y - b.y);
+
       const A = dist(eye[1], eye[5]);
       const B = dist(eye[2], eye[4]);
       const C = dist(eye[0], eye[3]);
+
       return (A + B) / (2.0 * C);
     }
 
-    // Detect Blink
     function detectBlink() {
+
       setInterval(async () => {
 
         if (video.readyState < 2) return;
@@ -196,12 +200,16 @@
           .withFaceLandmarks();
 
         if (!detection) {
+
           blinkFrames = 0;
+
           statusText.innerText = "No face detected";
+
           return;
         }
 
         const leftEye = detection.landmarks.getLeftEye();
+
         const rightEye = detection.landmarks.getRightEye();
 
         const EAR = (
@@ -209,69 +217,110 @@
           getEyeAspectRatio(rightEye)
         ) / 2;
 
-        // Debug info
-        statusText.innerText = `EAR: ${EAR.toFixed(2)} | Frames: ${blinkFrames}`;
+        statusText.innerText =
+          `EAR: ${EAR.toFixed(2)} | Blink Frames: ${blinkFrames}`;
 
-        // Blink Logic
         if (EAR < EAR_THRESHOLD) {
+
           blinkFrames++;
+
         } else {
+
           if (blinkFrames >= 1 && !blinkDetected) {
+
             blinkDetected = true;
-            statusText.innerText = "Blink detected  Capturing...";
+
+            statusText.innerText =
+              "Blink detected. Capturing...";
+
             capture();
+
             blinkFrames = 0;
           }
-
         }
 
       }, 150);
     }
 
     function capture() {
+
       if (captured) return;
 
       captured = true;
 
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const imageData = canvas.toDataURL("image/jpeg");
+      ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
-      statusText.innerText = "Captured successfully. Uploading...";
+      const imageData =
+        canvas.toDataURL("image/jpeg");
+
+      statusText.innerText =
+        "Captured successfully. Uploading...";
 
       fetch('/kyc/upload-liveness-selfie', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imageData })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          image: imageData
+        })
       })
         .then(res => res.json())
         .then(data => {
-          console.log('Upload success:', data);
-          statusText.innerText = "Liveness selfie uploaded successfully ";
 
-          window.location.href = '/document-front.html';
-          
+          console.log('Upload success:', data);
+
+          badge.style.display = "inline-block";
+
+          statusText.innerText =
+            "Liveness selfie uploaded successfully";
+
+          setTimeout(() => {
+            window.location.href =
+              '/document-front.html';
+          }, 1200);
+
         })
         .catch(err => {
+
           console.error(err);
-          statusText.innerText = "Upload failed";
+
+          statusText.innerText =
+            "Upload failed";
         });
     }
 
-
-    // 🔹 Reset
     function resetCapture() {
+
       blinkFrames = 0;
+
       blinkDetected = false;
+
       captured = false;
-      statusText.innerText = "Reset done. Blink again.";
+
+      badge.style.display = "none";
+
+      statusText.innerText =
+        "Reset done. Blink again.";
     }
 
-    // 🔹 Init
     window.onload = async function () {
+
       await loadModels();
+
       await startVideo();
+
       detectBlink();
     };
   </script>
