@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    container_name: desklocator-frontend
+    restart: always
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+
