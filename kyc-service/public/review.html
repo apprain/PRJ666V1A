@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,7 +36,7 @@
       background: white;
       border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     h1 {
@@ -130,87 +131,109 @@
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <div class="card">
+    <div class="card">
 
-    <h1>KYC Review</h1>
+      <h1>KYC Review</h1>
 
-    <p>
-      Your submitted selfie and document images are ready for verification.
-    </p>
+      <p>
+        Your submitted selfie and document images are ready for verification.
+      </p>
 
-    <h2>Verification Checks</h2>
+      <h2>Verification Checks</h2>
 
-    <div id="faceStatus" class="status-box">
-      Waiting for face verification...
+      <div id="faceStatus" class="status-box">
+        Waiting for face verification...
+      </div>
+
+      <div id="ocrStatus" class="status-box">
+        Waiting for OCR extraction...
+      </div>
+
+      <div id="livenessStatus" class="status-box">
+        Waiting for liveness validation...
+      </div>
+
+      <div id="finalStatus" class="status-box warning">
+        Verification in progress...
+      </div>
+
+      <button class="btn" onclick="startVerification()">
+        Start Background Verification
+      </button>
+
     </div>
-
-    <div id="ocrStatus" class="status-box">
-      Waiting for OCR extraction...
-    </div>
-
-    <div id="livenessStatus" class="status-box">
-      Waiting for liveness validation...
-    </div>
-
-    <div id="finalStatus" class="status-box warning">
-      Verification in progress...
-    </div>
-
-    <button class="btn" onclick="startVerification()">
-      Start Background Verification
-    </button>
 
   </div>
 
-</div>
+  <script>
+    function getKycToken() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("token") || sessionStorage.getItem("kyc_token");
+    }
 
-<script>
+    async function startVerification() {
 
-  async function startVerification() {
+      const faceStatus = document.getElementById('faceStatus');
+      const ocrStatus = document.getElementById('ocrStatus');
+      const livenessStatus = document.getElementById('livenessStatus');
+      const finalStatus = document.getElementById('finalStatus');
 
-    const faceStatus = document.getElementById('faceStatus');
-    const ocrStatus = document.getElementById('ocrStatus');
-    const livenessStatus = document.getElementById('livenessStatus');
-    const finalStatus = document.getElementById('finalStatus');
-  
-    finalStatus.className = 'status-box warning';
-    finalStatus.innerText = 'Running verification checks...';
+      finalStatus.className = 'status-box warning';
+      finalStatus.innerText = 'Running verification checks...';
 
-    faceStatus.innerText = 'Running face comparison...';
+      faceStatus.innerText = 'Running face comparison...';
 
-    await delay(1500);
+      await delay(1500);
 
-    faceStatus.className = 'status-box success';
-    faceStatus.innerText = 'Face verification passed';
+      faceStatus.className = 'status-box success';
+      faceStatus.innerText = 'Face verification passed';
 
-    ocrStatus.innerText = 'Extracting document information...';
+      ocrStatus.innerText = 'Extracting document information...';
 
-    await delay(1500);
+      await delay(1500);
 
-    ocrStatus.className = 'status-box success';
-    ocrStatus.innerText = 'Document OCR extraction completed';
+      ocrStatus.className = 'status-box success';
+      ocrStatus.innerText = 'Document OCR extraction completed';
 
-    livenessStatus.innerText = 'Checking liveness result...';
+      livenessStatus.innerText = 'Checking liveness result...';
 
-    await delay(1200);
+      await delay(1200);
 
-    livenessStatus.className = 'status-box success';
-    livenessStatus.innerText = 'Liveness verification passed';
+      livenessStatus.className = 'status-box success';
+      livenessStatus.innerText = 'Liveness verification passed';
 
-    finalStatus.className = 'status-box success';
-    finalStatus.innerText = 'KYC verification completed successfully';
+      finalStatus.className = 'status-box success';
+      finalStatus.innerText = 'KYC verification completed successfully';
 
-    setTimeout(() => {
-      window.location.href = 'http://20.151.59.28:3001/register';
-    }, 1000);
-  }
+      setTimeout(() => {
 
-  function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-</script>
+        const token = getKycToken();
+
+        if (!token) {
+          alert("KYC session expired or invalid");
+          window.location.href = "/verify";
+        }
+
+        fetch(`https://localhost:4000/api/v1/kyc/sessions/${token}/complete`, {
+          method: "GET"
+        })
+          .then(res => res.json())
+          .then(data => {
+            alert(data.redirectUrl);
+            window.location.href = data.redirectUrl;
+          });
+
+        //window.location.href = 'http://20.151.59.28:3001/register';
+      }, 1000);
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
 
 </body>
+
 </html>

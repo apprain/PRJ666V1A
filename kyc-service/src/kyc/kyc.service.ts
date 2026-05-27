@@ -3,7 +3,7 @@ import { MinioService } from './minio/minio.service';
 
 @Injectable()
 export class KycService {
-  constructor(private readonly minioService: MinioService) {}
+  constructor(private readonly minioService: MinioService) { }
 
   private base64ToFile(image: string, name: string): Express.Multer.File {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
@@ -47,5 +47,23 @@ export class KycService {
     } as Express.Multer.File;
 
     return this.minioService.uploadFile(file, 'liveness-selfie');
+  }
+
+  async uploadBuffer(
+    objectKey: string,
+    buffer: Buffer,
+    mimeType: string,
+  ) {
+    await this.minioService.putObject(
+      process.env.MINIO_BUCKET || 'kyc-private',
+      objectKey,
+      buffer,
+      buffer.length,
+      {
+        'Content-Type': mimeType,
+      },
+    );
+
+    return objectKey;
   }
 }

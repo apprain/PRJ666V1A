@@ -9,7 +9,10 @@ Backend:
 frontned
     npx next dev -p 3001
     npx next start -p 3001    
-
+	
+	
+KYC Admin Frontend:
+  npx next dev -p 3003
 
 
  MinIO
@@ -19,6 +22,14 @@ frontned
 
  KYC Service: 
     npm start dev    
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	Backend
 	http://localhost:3000

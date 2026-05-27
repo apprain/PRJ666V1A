@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -111,152 +112,167 @@
 
 <body>
 
-<div class="card">
+  <div class="card">
 
-  <h2>Capture Document Back</h2>
+    <h2>Capture Document Back</h2>
 
-  <div class="video-box">
-    <video id="video" autoplay muted playsinline></video>
-    <div class="guide"></div>
+    <div class="video-box">
+      <video id="video" autoplay muted playsinline></video>
+      <div class="guide"></div>
+    </div>
+
+    <canvas id="canvas" style="display:none"></canvas>
+
+    <div id="status" class="status">
+      Starting camera...
+    </div>
+
+    <button class="btn" onclick="captureDocumentBack()">
+      Capture Back
+    </button>
+
+    <button class="btn secondary" onclick="resetCapture()">
+      Retry
+    </button>
+
   </div>
 
-  <canvas id="canvas" style="display:none"></canvas>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const statusText = document.getElementById('status');
 
-  <div id="status" class="status">
-    Starting camera...
-  </div>
+    let captured = false;
 
-  <button class="btn" onclick="captureDocumentBack()" >
-    Capture Back
-  </button>
+    async function startCamera() {
 
-  <button class="btn secondary" onclick="resetCapture()">
-    Retry
-  </button>
+      try {
 
-</div>
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
 
-<script>
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const statusText = document.getElementById('status');
+        video.srcObject = stream;
 
-  let captured = false;
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
 
-  async function startCamera() {
+        statusText.innerText =
+          "Place document back inside the box";
 
-    try {
+      } catch (e) {
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
-      });
+        console.error(e);
 
-      video.srcObject = stream;
-
-      await new Promise(resolve => {
-        video.onloadedmetadata = () => {
-          video.play();
-          resolve();
-        };
-      });
-
-      statusText.innerText =
-        "Place document back inside the box";
-
-    } catch (e) {
-
-      console.error(e);
-
-      statusText.innerText =
-        "Camera access failed";
+        statusText.innerText =
+          "Camera access failed";
+      }
     }
-  }
 
-  function captureDocumentBack() {
+    function getKycToken() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("token") || sessionStorage.getItem("kyc_token");
+    }
 
-    if (captured) return;
+    function captureDocumentBack() {
 
-    captured = true;
+      if (captured) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+      captured = true;
 
-    const ctx = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const token = getKycToken();
+      const ctx = canvas.getContext("2d");
 
-    ctx.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+      ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
 
-    const imageData =
-      canvas.toDataURL("image/jpeg", 0.9);
+      const imageData =
+        canvas.toDataURL("image/jpeg", 0.9);
 
-    statusText.innerText =
-      "Uploading document back...";
+      statusText.innerText =
+        "Uploading document back...";
 
-    fetch('/kyc/upload-document-back', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        image: imageData
+      fetch(`/api/v1/kyc/sessions/${token}/documents/back`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: imageData,
+        }),
       })
-    })
-    .then(res => res.json())
-    .then(data => {
+        .then(res => res.json())
+        .then(data => {
 
-      console.log(
-        'Document back upload success:',
-        data
+          console.log(
+            'Document back upload success:',
+            data
+          );
+
+          statusText.innerText =
+            "Document back uploaded successfully";
+
+          setTimeout(() => {
+
+          
+            if (!token) {
+              alert("KYC session expired or invalid");
+              window.location.href = "/verify";
+            }
+
+            window.location.href = `/review.html?token=${encodeURIComponent(token)}`;
+
+            //window.location.href = '/review.html';
+          }, 800);
+
+        })
+        .catch(err => {
+
+          console.error(err);
+
+          statusText.innerText =
+            "Upload failed";
+
+          captured = false;
+        });
+    }
+
+    function resetCapture() {
+
+      captured = false;
+
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
       );
 
       statusText.innerText =
-        "Document back uploaded successfully";
+        "Place document back inside the box";
+    }
 
-      setTimeout(() => {
-        window.location.href = '/review.html';
-      }, 800);
-
-    })
-    .catch(err => {
-
-      console.error(err);
-
-      statusText.innerText =
-        "Upload failed";
-
-      captured = false;
-    });
-  }
-
-  function resetCapture() {
-
-    captured = false;
-
-    const ctx = canvas.getContext("2d");
-
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    statusText.innerText =
-      "Place document back inside the box";
-  }
-
-  window.onload = startCamera;
-</script>
+    window.onload = startCamera;
+  </script>
 
 </body>
+
 </html>

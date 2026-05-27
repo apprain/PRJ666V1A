@@ -46,4 +46,31 @@ export class MinioService {
       url: `${this.bucket}/${objectName}`,
     };
   }
+
+  async putObject(
+    bucket: string,
+    objectKey: string,
+    buffer: Buffer,
+    size: number,
+    metaData: Record<string, string>,
+  ) {
+    return this.client.putObject(
+      bucket,
+      objectKey,
+      buffer,
+      size,
+      metaData,
+    );
+  }
+
+  async getSignedUrl(
+    objectKey: string,
+    expirySeconds = 60 * 10,
+  ) {
+    return this.client.presignedGetObject(
+      process.env.MINIO_BUCKET || 'kyc-private',
+      objectKey,
+      expirySeconds,
+    );
+  }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,7 +36,7 @@
       background: white;
       border-radius: 24px;
       padding: 30px 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     .logo {
@@ -161,69 +162,81 @@
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-  <div class="card">
+    <div class="card">
 
-    <div class="logo">
-      🛡️
-    </div>
-
-    <h1>Identity Verification</h1>
-
-    <p class="subtitle">
-      We will securely verify your identity using live selfie validation and document verification.
-    </p>
-
-    <div class="steps">
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div class="step-text">
-          Selfie + Liveness Verification
-        </div>
+      <div class="logo">
+        🛡️
       </div>
 
-      <div class="step">
-        <div class="step-number">2</div>
-        <div class="step-text">
-          Capture Document Front
+      <h1>Identity Verification</h1>
+
+      <p class="subtitle">
+        We will securely verify your identity using live selfie validation and document verification.
+      </p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-text">
+            Selfie + Liveness Verification
+          </div>
         </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-text">
+            Capture Document Front
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-text">
+            Capture Document Back
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-text">
+            Review & Final Verification
+          </div>
+        </div>
+
       </div>
 
-      <div class="step">
-        <div class="step-number">3</div>
-        <div class="step-text">
-          Capture Document Back
-        </div>
+      <button class="btn" onclick="startVerification()">
+        Start Verification
+      </button>
+
+      <div class="note">
+        Please allow camera access and ensure proper lighting for accurate verification.
       </div>
 
-      <div class="step">
-        <div class="step-number">4</div>
-        <div class="step-text">
-          Review & Final Verification
-        </div>
-      </div>
-
-    </div>
-
-    <button class="btn" onclick="startVerification()">
-      Start Verification
-    </button>
-
-    <div class="note">
-      Please allow camera access and ensure proper lighting for accurate verification.
     </div>
 
   </div>
 
-</div>
+  <script>
+    function getKycToken() {
+      const parts = window.location.pathname.split("/");
+      return parts[parts.length - 1];
+    }
 
-<script>
-  function startVerification() {
-    window.location.href = '/selfie.html';
-  }
-</script>
+    function startVerification() {
+      const token = getKycToken();
 
+      if (!token) {
+        alert("Invalid KYC session token");
+        return;
+      }
+
+      sessionStorage.setItem("kyc_token", token);
+      window.location.href = `/selfie.html?token=${encodeURIComponent(token)}`;
+    }
+  </script>
 </body>
 </html>

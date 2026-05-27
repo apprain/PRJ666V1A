@@ -242,8 +242,21 @@ canvas {
       }, 150);
     }
 
+    
+  function getKycToken() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("token") || sessionStorage.getItem("kyc_token");
+  }
+
+
     function capture() {
 
+      const token = getKycToken();
+      if (!token) {
+        alert("KYC session expired or invalid");
+        window.location.href = "/verify";
+      }
+      
       if (captured) return;
 
       captured = true;
@@ -266,15 +279,16 @@ canvas {
 
       statusText.innerText =
         "Captured successfully. Uploading...";
-
-      fetch('/kyc/upload-liveness-selfie', {
-        method: 'POST',
+      //https://localhost:4000/api/v1/kyc/sessions/token/documents/selfie
+      //  fetch('/kyc/upload-liveness-selfie', {
+      fetch(`/api/v1/kyc/sessions/${token}/documents/selfie`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          image: imageData
-        })
+          image: imageData,
+        }),
       })
         .then(res => res.json())
         .then(data => {
@@ -287,8 +301,10 @@ canvas {
             "Liveness selfie uploaded successfully";
 
           setTimeout(() => {
-            window.location.href =
-              '/document-front.html';
+
+            
+            window.location.href = `/document-front.html?token=${encodeURIComponent(token)}`;
+
           }, 1200);
 
         })

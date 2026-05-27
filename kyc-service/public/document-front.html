@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -111,103 +112,121 @@
 
 <body>
 
-<div class="card">
-  <h2>Capture Document Front</h2>
+  <div class="card">
+    <h2>Capture Document Front</h2>
 
-  <div class="video-box">
-    <video id="video" autoplay muted playsinline></video>
-    <div class="guide"></div>
+    <div class="video-box">
+      <video id="video" autoplay muted playsinline></video>
+      <div class="guide"></div>
+    </div>
+
+    <canvas id="canvas" style="display:none"></canvas>
+
+    <div id="status" class="status">Starting camera...</div>
+
+    <button class="btn" onclick="captureDocumentFront()">Capture Front</button>
+    <button class="btn secondary" onclick="resetCapture()">Retry</button>
   </div>
 
-  <canvas id="canvas" style="display:none"></canvas>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const statusText = document.getElementById('status');
 
-  <div id="status" class="status">Starting camera...</div>
+    let captured = false;
 
-  <button class="btn" onclick="captureDocumentFront()" >Capture Front</button>
-  <button class="btn secondary" onclick="resetCapture()">Retry</button>
-</div>
+    function getKycToken() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("token") || sessionStorage.getItem("kyc_token");
+    }
 
-<script>
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const statusText = document.getElementById('status');
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
 
-  let captured = false;
+        video.srcObject = stream;
 
-  async function startCamera() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+        await new Promise(resolve => {
+          video.onloadedmetadata = () => {
+            video.play();
+            resolve();
+          };
+        });
+
+        statusText.innerText = "Place document front inside the box";
+      } catch (e) {
+        console.error(e);
+        statusText.innerText = "Camera access failed";
+      }
+    }
+
+    function captureDocumentFront() {
+
+      const token = getKycToken();
+      if (captured) return;
+
+      captured = true;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+      statusText.innerText = "Uploading document front...";
+
+      //https://localhost:4000/api/v1/kyc/sessions/d61497268ac68f0f93dc5de6ec364378aec3cda6e13d6b8c28585a21e5604acc/documents/front
+      //https://localhost:4000/api/v1/kyc/sessions/8e18a005441ea8be9b9a393ee77f9d484845aa7b5559bb9b8f38e511d8a55f64/documents/selfie
+      fetch(`/api/v1/kyc/sessions/${token}/documents/front`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        audio: false
-      });
+        body: JSON.stringify({
+          image: imageData,
+        }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Document front upload success:', data);
+          statusText.innerText = "Document front uploaded successfully";
 
-      video.srcObject = stream;
+          setTimeout(() => {
+            if (!token) {
+              alert("KYC session expired or invalid");
+              window.location.href = "/verify";
+            }
+            window.location.href = `/document-back.html?token=${encodeURIComponent(token)}`;
+          }, 800);
+        })
+        .catch(err => {
+          console.error(err);
+          statusText.innerText = "Upload failed";
+          captured = false;
+        });
+    }
 
-      await new Promise(resolve => {
-        video.onloadedmetadata = () => {
-          video.play();
-          resolve();
-        };
-      });
+    function resetCapture() {
+      captured = false;
+
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       statusText.innerText = "Place document front inside the box";
-    } catch (e) {
-      console.error(e);
-      statusText.innerText = "Camera access failed";
     }
-  }
 
-  function captureDocumentFront() {
-    if (captured) return;
-
-    captured = true;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = canvas.toDataURL("image/jpeg", 0.9);
-
-    statusText.innerText = "Uploading document front...";
-
-    fetch('/kyc/upload-document-front', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: imageData })
-    })
-    .then(res => res.json())
-    .then(data => {
-      console.log('Document front upload success:', data);
-      statusText.innerText = "Document front uploaded successfully";
-
-      setTimeout(() => {
-        window.location.href = '/document-back.html';
-      }, 800);
-    })
-    .catch(err => {
-      console.error(err);
-      statusText.innerText = "Upload failed";
-      captured = false;
-    });
-  }
-
-  function resetCapture() {
-    captured = false;
-
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    statusText.innerText = "Place document front inside the box";
-  }
-
-  window.onload = startCamera;
-</script>
+    window.onload = startCamera;
+  </script>
 
 </body>
+
 </html>
