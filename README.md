@@ -13,6 +13,8 @@ frontned
 	
 KYC Admin Frontend:
   npx next dev -p 3003
+  
+COS : Customer Onboarding System  
 
 
  MinIO
