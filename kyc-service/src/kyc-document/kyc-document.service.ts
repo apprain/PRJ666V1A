@@ -89,12 +89,7 @@ export class KycDocumentService {
             file.buffer,
             file.mimetype,
         );
-
-        /*
-      TEMPORARY
-      Later we upload to MinIO here
-    */
-
+        
         const document = this.kycDocumentRepo.create({
             session,
             documentType: 'selfie',

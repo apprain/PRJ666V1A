@@ -30,7 +30,7 @@ export default function RegisterPage() {
     const data = await res.json();
     console.log(data);
     alert(JSON.stringify(data));
-     router.push("/login");
+    //router.push("/login");
   }
 
   return (

@@ -6,17 +6,17 @@ import {
     UseGuards,
 } from '@nestjs/common';
 
-import { AdminService } from './admin.service';
+import { ClientAdminDashboardService } from './client-admin-dashboard.service';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 
 @Controller('api/v1/admin')
-export class AdminController {
-    constructor(private readonly adminService: AdminService) { }
+export class ClientAdminDashboardController {
+    constructor(private readonly ClientAdminDashboardService: ClientAdminDashboardService) { }
 
     @UseGuards(JwtAuthGuard)
     @Get('kyc/sessions')
     getSessions(@Req() req: any) {
-        return this.adminService.getSessions(req.user.clientAppId);
+        return this.ClientAdminDashboardService.getSessions(req.user.clientAppId);
     }
 
     @Get('kyc/sessions/:id/documents')
@@ -25,7 +25,7 @@ export class AdminController {
         @Param('id') id: string,
         @Req() req: any,
     ) {
-        return this.adminService.getSessionDocuments(
+        return this.ClientAdminDashboardService.getSessionDocuments(
             id,
             req.user.clientAppId,
         );

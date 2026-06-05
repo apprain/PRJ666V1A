@@ -11,7 +11,10 @@ import { ClientAppModule } from './client-app/client-app.module';
 import { KycSessionModule } from './kyc-session/kyc-session.module';
 import { KycDocumentModule } from './kyc-document/kyc-document.module';
 import { ClientAdminModule } from './client-admin/client-admin.module';
-import { AdminModule } from './admin/admin.module';
+import { ClientAdminDashboardModule } from './client-admin-dashboard/client-admin-dashboard.module';
+import { SystemAdminModule } from './system-admin/system-admin.module';
+import { AwsTextractModule } from './aws-textract/aws-textract.module';
+import { AwsRekognitionModule } from './aws-rekognition/aws-rekognition.module';
 
 @Module({
   imports: [
@@ -40,7 +43,13 @@ import { AdminModule } from './admin/admin.module';
 
     ClientAdminModule,
 
-    AdminModule,
+    ClientAdminDashboardModule,
+
+    SystemAdminModule,
+
+    AwsTextractModule,
+
+    AwsRekognitionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { AdminService } from './admin.service';
-import { AdminController } from './admin.controller';
+import { ClientAdminDashboardService } from './client-admin-dashboard.service';
+import { ClientAdminDashboardController } from './client-admin-dashboard.controller';
 
 import { KycSession } from '../kyc-session/kyc-session.entity';
 import { KycDocument } from '../kyc-document/kyc-document.entity';
@@ -28,7 +28,8 @@ import { MinioModule } from '../kyc/minio/minio.module';
     ]),
   ],
 
-  controllers: [AdminController],
-  providers: [AdminService],
+  controllers: [ClientAdminDashboardController],
+  providers: [ClientAdminDashboardService],
+  exports: [ClientAdminDashboardService],
 })
-export class AdminModule {}
+export class ClientAdminDashboardModule { }

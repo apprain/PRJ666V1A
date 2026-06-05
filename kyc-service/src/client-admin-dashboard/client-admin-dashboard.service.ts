@@ -6,7 +6,7 @@ import { KycDocument } from '../kyc-document/kyc-document.entity';
 import { MinioService } from '../kyc/minio/minio.service';
 
 @Injectable()
-export class AdminService {
+export class ClientAdminDashboardService {
     constructor(
         @InjectRepository(KycSession)
         private readonly kycSessionRepo: Repository<KycSession>,
@@ -65,7 +65,7 @@ export class AdminService {
                 },
             });
 
-    const result: any[] = [];
+        const result: any[] = [];
 
         for (const doc of documents) {
             const signedUrl =
@@ -77,6 +77,35 @@ export class AdminService {
                 id: doc.id,
                 type: doc.documentType,
                 status: doc.status,
+                signedUrl,
+                ocrFullText:doc.ocrFullText
+            });
+        }
+
+        return result;
+    }
+
+    async getSessionDocumentsForSystemAdmin(sessionId: string) {
+        const documents = await this.kycDocumentRepo.find({
+            where: {
+                session: {
+                    id: sessionId,
+                },
+            },
+        });
+
+        const result: any[] = [];
+
+        for (const doc of documents) {
+            const signedUrl = await this.minioService.getSignedUrl(
+                doc.minioObjectKey,
+            );
+
+            result.push({
+                id: doc.id,
+                type: doc.documentType,
+                status: doc.status,
+                ocrFullText: doc.ocrFullText,
                 signedUrl,
             });
         }

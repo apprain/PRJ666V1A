@@ -107,8 +107,32 @@ export class ClientAdminService {
                 name: admin.name,
                 email: admin.email,
                 role: admin.role,
-                clientAppId: admin.clientApp.id,
+                clientAppId: admin.clientApp.id
             },
         };
+    }
+    async findAll() {
+        const admins = await this.clientAdminRepo.find({
+            relations: {
+                clientApp: true,
+            },
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+
+        return admins.map((admin) => ({
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            role: admin.role,
+            status: admin.status,
+            createdAt: admin.createdAt,
+            clientApp: {
+                id: admin.clientApp.id,
+                name: admin.clientApp.name,
+                clientId: admin.clientApp.clientId,
+            },
+        }));
     }
 }

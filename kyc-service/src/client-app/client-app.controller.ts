@@ -4,7 +4,7 @@ import { CreateClientAppDto } from './dto/create-client-app.dto';
 
 @Controller('api/v1/client-apps')
 export class ClientAppController {
-  constructor(private readonly clientAppService: ClientAppService) {}
+  constructor(private readonly clientAppService: ClientAppService) { }
 
   @Post()
   create(@Body() dto: CreateClientAppDto) {

@@ -35,4 +35,28 @@ export class KycSession {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true })
+  reviewStatus: string;
+
+  @Column({ type: 'text', nullable: true })
+  reviewRemarks: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  reviewedBy: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  reviewedAt: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  faceMatchStatus: string | null;
+
+  @Column({ type: 'float', nullable: true })
+  faceMatchScore: number | null;
+
+  @Column({ type: 'float', nullable: true })
+  faceMatchConfidence: number | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  faceCheckedAt: Date | null;
 }

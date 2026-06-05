@@ -23,14 +23,7 @@ KYC Admin Frontend:
  KYC Service: 
     npm start dev    
 	
-	
-	
-	
-	
-	
-	
-	
-	
+		
 	Backend
 	http://localhost:3000
 	http://localhost:3000/api-docs#/
@@ -49,17 +42,18 @@ KYC Admin Frontend:
 	
 	http://20.151.59.28:3001/
 	
+	KYC Admin Frontend:
+	http://localhost:3003/client-admin/login
+	
+	http://localhost:3003/system-admin/login
+	
+	
 	Desklocator
 	http://20.151.59.28:3002/
 	
 	Verify Token: 
 	http://localhost:3001/share/verify/95b09007-f6b6-45a1-abda-c71800627816
 	
-	
-	
-
-
-
 VM Setup Azure: (Manika Account):
 
 1. Azure Portal → Resource groups → Create
@@ -67,4 +61,7 @@ VM Setup Azure: (Manika Account):
   ssh prj666gr1@20.151.59.28
   prj666project@2026
 
+
+
+################ KYC INTEGRATION ###############
 

@@ -36,4 +36,23 @@ export class KycDocument {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ type: 'text', nullable: true })
+  ocrFullText: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  ocrLines: string[] | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  ocrCheckedAt: Date | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  ocrFirstName: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  ocrLastName: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  ocrDocumentNumber: string | null;
+
 }

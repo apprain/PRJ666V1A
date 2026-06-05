@@ -43,4 +43,13 @@ export class ClientAppService {
     async findByClientId(clientId: string) {
         return this.clientAppRepo.findOne({ where: { clientId } });
     }
+
+    async findAll() {
+        return this.clientAppRepo.find({
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+    }
+    
 }

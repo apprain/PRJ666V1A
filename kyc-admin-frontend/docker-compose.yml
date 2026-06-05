@@ -1,0 +1,12 @@
+services:
+  kyc-admin-frontend:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_KYC_API_URL: https://localhost:4000
+    container_name: kyc-admin-frontend
+    restart: always
+    ports:
+      - "3003:3003"
+    environment:
+      - NEXT_PUBLIC_KYC_API_URL=https://localhost:4000

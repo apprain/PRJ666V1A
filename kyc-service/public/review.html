@@ -174,63 +174,111 @@
     }
 
     async function startVerification() {
+      const token = getKycToken();
 
-      const faceStatus = document.getElementById('faceStatus');
-      const ocrStatus = document.getElementById('ocrStatus');
-      const livenessStatus = document.getElementById('livenessStatus');
-      const finalStatus = document.getElementById('finalStatus');
+      const faceStatus = document.getElementById("faceStatus");
+      const ocrStatus = document.getElementById("ocrStatus");
+      const livenessStatus = document.getElementById("livenessStatus");
+      const finalStatus = document.getElementById("finalStatus");
 
-      finalStatus.className = 'status-box warning';
-      finalStatus.innerText = 'Running verification checks...';
+      if (!token) {
+        alert("KYC session expired or invalid");
+        window.location.href = "/verify";
+        return;
+      }
 
-      faceStatus.innerText = 'Running face comparison...';
+      try {
+        finalStatus.className = "status-box warning";
+        finalStatus.innerText = "Running verification checks...";
 
-      await delay(1500);
+        // 1. Face Match
+        faceStatus.className = "status-box warning";
+        faceStatus.innerText = "Running face comparison...";
 
-      faceStatus.className = 'status-box success';
-      faceStatus.innerText = 'Face verification passed';
+        const faceRes = await fetch(
+          `https://localhost:4000/api/v1/kyc/sessions/${token}/face-check-by-token`,
+          {
+            method: "POST",
+          }
+        );
 
-      ocrStatus.innerText = 'Extracting document information...';
+        const faceData = await faceRes.json();
 
-      await delay(1500);
+        if (!faceData.matched) {
+          faceStatus.className = "status-box error";
+          faceStatus.innerText =
+            faceData.reason || "Face verification failed";
 
-      ocrStatus.className = 'status-box success';
-      ocrStatus.innerText = 'Document OCR extraction completed';
+          finalStatus.className = "status-box error";
+          finalStatus.innerText =
+            "Verification failed. Please retake your selfie or document photo.";
 
-      livenessStatus.innerText = 'Checking liveness result...';
-
-      await delay(1200);
-
-      livenessStatus.className = 'status-box success';
-      livenessStatus.innerText = 'Liveness verification passed';
-
-      finalStatus.className = 'status-box success';
-      finalStatus.innerText = 'KYC verification completed successfully';
-
-      setTimeout(() => {
-
-        const token = getKycToken();
-
-        if (!token) {
-          alert("KYC session expired or invalid");
-          window.location.href = "/verify";
+          return;
         }
 
-        fetch(`https://localhost:4000/api/v1/kyc/sessions/${token}/complete`, {
-          method: "GET"
-        })
-          .then(res => res.json())
-          .then(data => {
-            alert(data.redirectUrl);
-            window.location.href = data.redirectUrl;
-          });
+        faceStatus.className = "status-box success";
+        faceStatus.innerText =
+          `Face matched successfully. Score: ${Number(faceData.similarity).toFixed(2)}%`;
 
-        //window.location.href = 'http://20.151.59.28:3001/register';
-      }, 1000);
-    }
+        // 2. OCR
+        ocrStatus.className = "status-box warning";
+        ocrStatus.innerText = "Extracting document information...";
 
-    function delay(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+        const ocrRes = await fetch(
+          `https://localhost:4000/api/v1/kyc/sessions/${token}/ocr-by-token`,
+          {
+            method: "POST",
+          }
+        );
+
+        const ocrData = await ocrRes.json();
+
+        if (!ocrData.success) {
+          ocrStatus.className = "status-box error";
+          ocrStatus.innerText =
+            ocrData.reason || "OCR extraction failed";
+
+          finalStatus.className = "status-box error";
+          finalStatus.innerText =
+            "Verification failed. Please upload a clearer document image.";
+
+          return;
+        }
+
+        ocrStatus.className = "status-box success";
+        ocrStatus.innerText =
+          `OCR completed. Extracted: ${ocrData.fullText}`;
+
+        // 3. Liveness placeholder
+        livenessStatus.className = "status-box success";
+        livenessStatus.innerText = "Liveness verification passed";
+
+        // 4. Complete KYC
+        finalStatus.className = "status-box warning";
+        finalStatus.innerText = "Finalizing KYC session...";
+
+        const completeRes = await fetch(
+          `https://localhost:4000/api/v1/kyc/sessions/${token}/complete`,
+          {
+            method: "GET",
+          }
+        );
+
+        const completeData = await completeRes.json();
+
+        finalStatus.className = "status-box success";
+        finalStatus.innerText = "KYC verification completed successfully";
+
+        setTimeout(() => {
+          window.location.href = completeData.redirectUrl;
+        }, 1000);
+      } catch (error) {
+        console.error(error);
+
+        finalStatus.className = "status-box error";
+        finalStatus.innerText =
+          "Verification failed due to a system error. Please try again.";
+      }
     }
   </script>
 

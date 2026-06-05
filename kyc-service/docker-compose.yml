@@ -1,48 +1,59 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: kyc-postgres
+    restart: always
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: kyc_service_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   minio:
     image: minio/minio
-    container_name: minio
-
+    container_name: kyc-minio
     command: server /data --console-address ":9001"
-
     ports:
       - "9000:9000"
       - "9001:9001"
-
     environment:
       MINIO_ROOT_USER: admin
       MINIO_ROOT_PASSWORD: password123
-
     volumes:
       - minio_data:/data
 
-  frontend:
+  kyc-service:
     build: .
-    container_name: task-frontend
+    container_name: kyc-service
     restart: always
-
     ports:
       - "4000:4000"
-
     command: npm run start:dev
-
     volumes:
       - .:/app
       - /app/node_modules
-
     environment:
       - PORT=4000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=123456
+      - DB_NAME=kyc_service_db
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=kyc-private
-
     depends_on:
+      - postgres
       - minio
 
 volumes:
+  postgres_data:
   minio_data:

@@ -72,5 +72,20 @@ export class MinioService {
       objectKey,
       expirySeconds,
     );
+  } 
+
+  async getObjectBuffer(objectKey: string): Promise<Buffer> {
+    const stream = await this.client.getObject(
+      process.env.MINIO_BUCKET || "kyc-private",
+      objectKey,
+    );
+
+    const chunks: Buffer[] = [];
+
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+      stream.on("error", reject);
+    });
   }
 }
