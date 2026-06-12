@@ -33,11 +33,13 @@ export class KycDocumentController {
   uploadSelfiefront(
     @Param('token') token: string,
     @Body('image') image: string,
+    @Body('documentType') documentType: string,
   ) {
-    return this.kycDocumentService.uploadSelfieBase64(
+    return this.kycDocumentService.uploadDocumentFrontBase64(
       token,
       image,
       'doc-front',
+      documentType,
     );
   }
 

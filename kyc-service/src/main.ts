@@ -23,10 +23,17 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(process.env.PORT ?? 4000);
+  const port = process.env.PORT ?? 4000;
+
+  await app.listen(port, '0.0.0.0');
 
   console.log('HTTPS Running');
-  console.log('https://localhost:4000');
+  console.log(`https://localhost:${port}`);
+
+  // await app.listen(process.env.PORT ?? 4000);
+
+  // console.log('HTTPS Running');
+  // console.log('https://localhost:4000');
 }
 
 bootstrap();

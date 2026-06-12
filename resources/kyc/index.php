@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>KYC Live Selfie</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #fff;
+}
+
+video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  padding: calc(env(safe-area-inset-top) + 22px) 22px calc(env(safe-area-inset-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,.65),
+    rgba(0,0,0,.05),
+    rgba(0,0,0,.75)
+  );
+}
+
+.top {
+  text-align: center;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  margin-top: 8px;
+  color: #ddd;
+}
+
+#flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+}
+
+.face-oval{
+  top: 45%;
+  transition: all .3s ease;
+}
+
+.face-oval {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(76vw, 330px);
+  height: min(58vh, 500px);
+  transform: translate(-50%, -50%);
+  border: 5px solid rgba(255,255,255,.9);
+  border-radius: 999px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,.42);
+}
+
+.face-oval.ok {
+  border-color: #22c55e;
+}
+
+.face-oval.warn {
+  border-color: #f59e0b;
+}
+
+.face-oval.busy {
+  border-color: #3b82f6;
+}
+
+.bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + 28px);
+  text-align: center;
+  padding: 0 18px;
+}
+
+.message {
+  display: inline-block;
+  max-width: 92vw;
+  padding: 16px 22px;
+  background: rgba(0,0,0,.72);
+  border-radius: 999px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.checks {
+  margin: 18px auto 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.check {
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.35);
+}
+
+.check.done {
+  background: #22c55e;
+}
+
+.countdown {
+  display: none;
+  margin-top: 20px;
+  font-size: 86px;
+  font-weight: 900;
+}
+
+.retry {
+  margin-top: 22px;
+  border: 0;
+  border-radius: 999px;
+  padding: 16px 34px;
+  background: rgba(255,255,255,.22);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.success {
+  display: none;
+  margin-top: 14px;
+  color: #22c55e;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+canvas {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <video id="video" autoplay muted playsinline></video>
+
+  <div class="overlay">
+    <div class="top">
+      <h1 class="title">Live Selfie</h1>
+      <div class="subtitle">Follow the instruction on screen</div>
+    </div>
+
+    <div id="faceOval" class="face-oval"></div>
+
+    <div class="bottom">
+      <div id="message" class="message">Starting camera...</div>
+
+      <div class="checks">
+        <div id="c1" class="check"></div>
+        <div id="c2" class="check"></div>
+        <div id="c3" class="check"></div>
+        <div id="c4" class="check"></div>
+      </div>
+
+      <div id="countdown" class="countdown">3</div>
+      <div id="success" class="success">Verified ✓</div>
+
+      <button class="retry" onclick="resetFlow()">Retry</button>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const msg = document.getElementById("message");
+const oval = document.getElementById("faceOval");
+const countdownEl = document.getElementById("countdown");
+const successEl = document.getElementById("success");
+
+const checks = [
+  document.getElementById("c1"),
+  document.getElementById("c2"),
+  document.getElementById("c3"),
+  document.getElementById("c4")
+];
+
+const flash = document.getElementById("flash");
+const EAR_THRESHOLD = 0.29;
+const FACE_SCORE_THRESHOLD = 0.65;
+const MIN_FACE_RATIO = 0.22;
+const MAX_FACE_RATIO = 0.82;
+const MIN_BRIGHTNESS = 35;
+const MAX_BRIGHTNESS = 230;
+
+let step = "CENTER";
+let blinkFrames = 0;
+let captured = false;
+let running = false;
+let timer = null;
+
+function setMessage(text, state = "") {
+  msg.innerText = text;
+  oval.className = "face-oval";
+
+  if (state) {
+    oval.classList.add(state);
+  }
+}
+
+function mark(index) {
+  if (checks[index]) checks[index].classList.add("done");
+}
+
+function clearMarks() {
+  checks.forEach(c => c.classList.remove("done"));
+}
+
+async function loadModels() {
+  setMessage("Loading...");
+  await faceapi.nets.tinyFaceDetector.loadFromUri("models/tiny_face_detector");
+  await faceapi.nets.faceLandmark68Net.loadFromUri("models/face_landmark_68");
+}
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    });
+
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve();
+      };
+    });
+
+    setMessage("Center your face", "warn");
+  } catch (e) {
+    setMessage("Camera permission needed", "warn");
+  }
+}
+
+function eyeRatio(eye) {
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const A = dist(eye[1], eye[5]);
+  const B = dist(eye[2], eye[4]);
+  const C = dist(eye[0], eye[3]);
+  return (A + B) / (2 * C);
+}
+
+function headDirection(detection) {
+  const landmarks = detection.landmarks;
+  const nose = landmarks.getNose()[3];
+  const leftEye = landmarks.getLeftEye()[0];
+  const rightEye = landmarks.getRightEye()[3];
+
+  const eyeCenterX = (leftEye.x + rightEye.x) / 2;
+  const diff = nose.x - eyeCenterX;
+
+  if (diff < -18) return "LEFT";
+  if (diff > 18) return "RIGHT";
+  return "CENTER";
+}
+
+function brightnessOk() {
+  const temp = document.createElement("canvas");
+  const ctx = temp.getContext("2d");
+
+  temp.width = 120;
+  temp.height = 90;
+
+  ctx.drawImage(video, 0, 0, temp.width, temp.height);
+
+  const data = ctx.getImageData(0, 0, temp.width, temp.height).data;
+  let total = 0;
+
+  for (let i = 0; i < data.length; i += 4) {
+    total += (data[i] + data[i + 1] + data[i + 2]) / 3;
+  }
+
+  const avg = total / (data.length / 4);
+  return avg >= MIN_BRIGHTNESS && avg <= MAX_BRIGHTNESS;
+}
+
+function alignmentStatus(box) {
+  const vw = video.videoWidth;
+  const vh = video.videoHeight;
+
+  const faceCenterX = box.x + box.width / 2;
+  const faceCenterY = box.y + box.height / 2;
+
+  const xOff = Math.abs(faceCenterX - vw / 2);
+  const yOff = Math.abs(faceCenterY - vh / 2);
+
+  const faceRatio = box.width / vw;
+
+  if (faceRatio < MIN_FACE_RATIO) return "MOVE_CLOSER";
+  if (faceRatio > MAX_FACE_RATIO) return "MOVE_BACK";
+  if (xOff > vw * 0.25) return "CENTER";
+  if (yOff > vh * 0.25) return "CENTER";
+
+  return "OK";
+}
+
+function startDetection() {
+  running = true;
+
+  timer = setInterval(async () => {
+    if (!running || captured || video.readyState < 2) return;
+
+    const detection = await faceapi
+      .detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions({
+          inputSize: 320,
+          scoreThreshold: 0.7
+        })
+      )
+      .withFaceLandmarks();
+
+    if (!detection || detection.detection.score < FACE_SCORE_THRESHOLD) {
+      blinkFrames = 0;
+      setMessage("No face detected", "warn");
+      return;
+    }
+
+    const box = detection.detection.box;
+    const align = alignmentStatus(box);
+
+    if (align === "MOVE_CLOSER") {
+      setMessage("Move closer", "warn");
+      return;
+    }
+
+    if (align === "MOVE_BACK") {
+      setMessage("Move back", "warn");
+      return;
+    }
+
+    if (align === "CENTER") {
+      setMessage("Center your face", "warn");
+      return;
+    }
+
+    if (!brightnessOk()) {
+      setMessage("Improve lighting", "warn");
+      return;
+    }
+
+    const direction = headDirection(detection);
+
+    if (step === "CENTER") {
+      setMessage("Face ready ✓", "ok");
+      mark(0);
+
+      setTimeout(() => {
+        step = "LEFT";
+      }, 500);
+
+      return;
+    }
+
+    if (step === "LEFT") {
+      setMessage("Turn left", "busy");
+
+      if (direction === "LEFT") {
+        mark(1);
+        setMessage("Left done ✓", "ok");
+
+        setTimeout(() => {
+          step = "RIGHT";
+        }, 600);
+      }
+
+      return;
+    }
+
+    if (step === "RIGHT") {
+      setMessage("Turn right", "busy");
+
+      if (direction === "RIGHT") {
+        mark(2);
+        setMessage("Right done ✓", "ok");
+
+        setTimeout(() => {
+          step = "BLINK";
+        }, 600);
+      }
+
+      return;
+    }
+
+    if (step === "BLINK") {
+      setMessage("Blink once", "busy");
+
+      const leftEye = detection.landmarks.getLeftEye();
+      const rightEye = detection.landmarks.getRightEye();
+
+      const ear = (eyeRatio(leftEye) + eyeRatio(rightEye)) / 2;
+		//console.log(ear);
+      if (ear < EAR_THRESHOLD) {
+        blinkFrames++;
+      } else {
+        if (blinkFrames >= 1) {
+          mark(3);
+          step = "CAPTURE";
+          setMessage("Hold still", "busy");
+          startCountdown();
+        }
+
+        blinkFrames = 0;
+      }
+    }
+  }, 160);
+}
+
+function startCountdown() {
+  running = false;
+  countdownEl.style.display = "block";
+
+  let count = 3;
+  countdownEl.innerText = count;
+
+  const cd = setInterval(() => {
+    count--;
+
+    if (count > 0) {
+      countdownEl.innerText = count;
+    } else {
+      clearInterval(cd);
+      countdownEl.style.display = "none";
+      capture();
+    }
+  }, 650);
+}
+
+function cameraFlash() {
+  flash.style.opacity = "1";
+
+  setTimeout(() => {
+    flash.style.opacity = "0";
+  }, 120);
+}
+
+function capture() {
+  if (captured) return;
+
+
+  captured = true;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.save();
+  ctx.translate(canvas.width, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+	cameraFlash();
+  const imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+  console.log("Captured Image:", imageData);
+
+  setMessage("Verification complete", "ok");
+  successEl.style.display = "block";
+
+  /*
+  fetch("kyc.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      image: imageData,
+      liveness: {
+        face: true,
+        left: true,
+        right: true,
+        blink: true
+      }
+    })
+  });
+  */
+}
+
+function resetFlow() {
+  step = "CENTER";
+  blinkFrames = 0;
+  captured = false;
+  running = true;
+
+  successEl.style.display = "none";
+  countdownEl.style.display = "none";
+  clearMarks();
+
+  if (timer) {
+    clearInterval(timer);
+  }
+
+  setMessage("Center your face", "warn");
+  startDetection();
+}
+
+window.onload = async function () {
+  await loadModels();
+  await startCamera();
+  startDetection();
+};
+</script>
+
+<div id="flash"></div>
+</body>
+</html>

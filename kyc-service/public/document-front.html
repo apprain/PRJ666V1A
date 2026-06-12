@@ -107,6 +107,17 @@
       color: #333;
       margin-top: 10px;
     }
+
+    .doc-select {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 12px;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      font-size: 16px;
+      display: block;
+    }
   </style>
 </head>
 
@@ -114,6 +125,12 @@
 
   <div class="card">
     <h2>Capture Document Front</h2>
+
+    <select id="documentType" class="doc-select">
+      <option value="NID">National ID</option>
+      <option value="PASSPORT">Passport</option>
+      <option value="DRIVING_LICENSE">Driving License</option>
+    </select>
 
     <div class="video-box">
       <video id="video" autoplay muted playsinline></video>
@@ -129,6 +146,7 @@
   </div>
 
   <script>
+    const documentTypeSelect = document.getElementById("documentType");
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const statusText = document.getElementById('status');
@@ -172,6 +190,9 @@
       const token = getKycToken();
       if (captured) return;
 
+      const documentType = documentTypeSelect.value;
+      sessionStorage.setItem("kyc_document_type", documentType);
+
       captured = true;
 
       canvas.width = video.videoWidth;
@@ -193,6 +214,7 @@
         },
         body: JSON.stringify({
           image: imageData,
+          documentType: documentType,
         }),
       })
         .then(res => res.json())

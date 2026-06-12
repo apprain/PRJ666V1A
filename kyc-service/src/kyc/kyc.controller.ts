@@ -5,16 +5,22 @@ import {
   Post,
   UploadedFile,
   UseInterceptors,
+  Get,
 } from '@nestjs/common';
 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-
+import { Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
+import { MinioService } from './minio/minio.service';
 import { KycService } from './kyc.service';
 
 @Controller('kyc')
 export class KycController {
-  constructor(private readonly kycService: KycService) { }
+  constructor(
+    private readonly kycService: KycService,
+    private readonly minioService: MinioService,
+  ) { }
 
   @Post('upload-liveness-selfie')
   async uploadLivenessSelfie(@Body('image') image: string) {
@@ -74,5 +80,23 @@ export class KycController {
       );
     }
     return this.kycService.uploadNid(file);
+  }
+
+  @Get('files/view')
+  async viewFile(
+    @Query('key') key: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const objectKey = decodeURIComponent(key);
+      const stream = await this.minioService.getObject(objectKey);
+      res.setHeader('Content-Type', 'image/jpeg');
+      return stream.pipe(res);
+    } catch (error) {
+      console.error('MinIO view file error:', error);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
   }
 }

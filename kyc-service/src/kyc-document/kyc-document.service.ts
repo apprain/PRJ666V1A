@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 
 import { KycDocument } from './kyc-document.entity';
 import { KycSessionService } from '../kyc-session/kyc-session.service';
+import { console } from 'inspector';
 
 @Injectable()
 export class KycDocumentService {
@@ -21,7 +22,7 @@ export class KycDocumentService {
     ) { }
 
 
-    async uploadSelfieBase64(token: string, image: string,doctype: string) {
+    async uploadSelfieBase64(token: string, image: string, doctype: string) {
         if (!image) {
             throw new BadRequestException('image is required');
         }
@@ -62,6 +63,26 @@ export class KycDocumentService {
         };
     }
 
+    async uploadDocumentFrontBase64(
+        token: string,
+        image: string,
+        doctype: string,
+        documenttype: string,
+    ) {
+
+        const session = await this.kycSessionService.findByToken(token);
+
+        if (!session) {
+            throw new NotFoundException('Invalid session token');
+        }
+        console.log(session);
+        session.documentType = documenttype;
+
+        await this.kycSessionService.save(session);
+
+        return this.uploadSelfieBase64(token, image, doctype);
+    }
+
     async uploadSelfie(
         token: string,
         file: Express.Multer.File,
@@ -89,7 +110,7 @@ export class KycDocumentService {
             file.buffer,
             file.mimetype,
         );
-        
+
         const document = this.kycDocumentRepo.create({
             session,
             documentType: 'selfie',
@@ -108,5 +129,15 @@ export class KycDocumentService {
             objectKey,
             status: saved.status,
         };
+    }
+
+    async findBySessionId(sessionId: string) {
+        return this.kycDocumentRepo.find({
+            where: {
+                session: {
+                    id: sessionId,
+                },
+            },
+        });
     }
 }

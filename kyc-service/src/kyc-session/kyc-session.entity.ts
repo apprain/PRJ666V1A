@@ -18,6 +18,9 @@ export class KycSession {
   @Column()
   externalUserId: string;
 
+  @Column({ nullable: true })
+  documentType: string;
+
   @Column()
   redirectUrl: string;
 

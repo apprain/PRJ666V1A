@@ -10,11 +10,15 @@ import {
 } from '@nestjs/common';
 
 import { KycSessionService } from './kyc-session.service';
+import { KycDocumentService } from '../kyc-document/kyc-document.service';
 import { CreateKycSessionDto } from './dto/create-kyc-session.dto';
 
 @Controller('api/v1/kyc/sessions')
 export class KycSessionController {
-    constructor(private readonly kycSessionService: KycSessionService) { }
+    constructor(
+        private readonly kycSessionService: KycSessionService,
+        private readonly kycDocumentService: KycDocumentService,
+    ) { }
 
     @Post()
     create(
@@ -29,6 +33,63 @@ export class KycSessionController {
         }
 
         return this.kycSessionService.create(clientId, clientSecret, dto);
+    }
+
+    @Get(':token/summary')
+    async summary(@Param('token') token: string) {
+        const session = await this.kycSessionService.findByToken(token);
+
+        if (!session) {
+            throw new NotFoundException('Invalid token');
+        }
+
+        const documents = await this.kycDocumentService.findBySessionId(
+            session.id,
+        );
+
+        const latestDocuments = ['doc-front', 'doc-back', 'selfie']
+            .map(type =>
+                documents
+                    .filter(d => d.documentType === type)
+                    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
+            )
+            .filter(Boolean);
+
+        const frontDoc = latestDocuments.find(
+            doc => doc.documentType === 'doc-front',
+        );
+
+        return {
+            sessionId: session.id,
+            status: session.status,
+            externalUserId: session.externalUserId,
+            expiresAt: session.expiresAt,
+            reviewStatus: session.reviewStatus,
+            faceMatchScore: session.faceMatchScore,
+            faceMatchStatus: session.faceMatchStatus,
+            faceMatchConfidence: session.faceMatchConfidence,
+            firstName: frontDoc?.ocrFirstName ?? null,
+            lastName: frontDoc?.ocrLastName ?? null,
+            fullName: [frontDoc?.ocrFirstName, frontDoc?.ocrLastName]
+                .filter(Boolean)
+                .join(' ') || null,
+            dateOfBirth: frontDoc?.ocrDateOfBirth ?? null,
+            documentNumber: frontDoc?.ocrDocumentNumber ?? null,
+
+            documents: latestDocuments.map((doc) => ({
+                documentType: doc.documentType,
+                originalFileName: doc.originalFileName,
+                minioObjectKey: doc.minioObjectKey,
+                mimeType: doc.mimeType,
+                size: doc.size,
+                status: doc.status,
+                ocrFullText: doc.ocrFullText,
+                ocrLines: doc.ocrLines,
+                ocrFirstName: doc.ocrFirstName,
+                ocrLastName: doc.ocrLastName,
+                ocrDocumentNumber: doc.ocrDocumentNumber,
+            })),
+        };
     }
 
     @Get(':token')
@@ -47,6 +108,8 @@ export class KycSessionController {
         };
     }
 
+
+
     @Get(':token/complete')
     complete(@Param('token') token: string) {
         return this.kycSessionService.complete(token);
@@ -64,10 +127,10 @@ export class KycSessionController {
         return this.kycSessionService.compareFacesByToken(token);
     }
 
-    @Post(':id/ocr')
-    extractOcr(@Param('id') id: string) {
-        return this.kycSessionService.extractDocumentText(id);
-    }
+    // @Post(':id/ocr')
+    // extractOcr(@Param('id') id: string) {
+    //     return this.kycSessionService.extractDocumentText(id);
+    // }
 
     @Post(':token/ocr-by-token')
     extractOcrByToken(

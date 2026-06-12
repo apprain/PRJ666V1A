@@ -14,17 +14,92 @@ frontned
 KYC Admin Frontend:
   npx next dev -p 3003
   
-COS : Customer Onboarding System  
+  # Client admnin
+  abccp@test.com/Admin@123
+  
+  # Create System admnin
+  docker exec -it kyc-postgres psql -U postgres -d kyc_service_db
+  \dt
+  
+  Gen Password
+  node -e "const bcrypt=require('bcrypt'); bcrypt.hash('Admin@123',10).then(console.log)"
+  $2b$10$yreY0VW6BOWkEazgfUphR.vL8Z3X3dlqVV7S47SkmfnDoou98QiIG
+  
+	INSERT INTO system_admin_users (
+		name,
+		email,
+		"passwordHash",
+		role,
+		status
+	)
+	VALUES (
+		'System Admin',
+		'admin@kyc.com',
+		'$2b$10$yreY0VW6BOWkEazgfUphR.vL8Z3X3dlqVV7S47SkmfnDoou98QiIG',
+		'super_admin',
+		'active'
+	);
+  
+  
+  
+COS : Customer Origination System  
+    backend
+    npm start dev
+    frontend
+	npx next dev -p 3005
+	
+	Off HTTPS:
+	$env:NODE_TLS_REJECT_UNAUTHORIZED="0"
+	
+	Admin Link: http://localhost:3005/admin/login
+	admin@abccp.com/Admin@12345
+	
+	INSERT INTO admin_users (
+		id,
+		"tenantId",
+		email,
+		"passwordHash",
+		role,
+		"createdAt"
+	)
+	VALUES (
+		gen_random_uuid(),
+		'abccp',
+		'admin@abccp.com',
+		'$2b$10$lHbGpkJxz9nv9OidZN4xqO7Jm2a1G/AAD9PGAOm5sq9cBL/gLTCsW',
+		'TENANT_ADMIN',
+		NOW()
+	);
+	
+	### APP INFO
+	Name: cos {Local}
+	Client ID: app_d1b7e500ee2b09312e921ecf
+	Client Secret: secret_b6920cb4e26c9a6fac17b175eaa934f47a5946be06053bec
+	http://localhost:3005/kyc/callback
+	http://localhost:3005/kyc/webhook	
 
-
- MinIO
-    docker compose up    
-     http://localhost:9000  
+    ##Local Docker:
+	Name: abccp
+	Client ID: app_c76c7b7b025c0f3dcad1e024
+	Client Secret: secret_609b81ba7d7222ccd415077d60eacaa716c0c1d311981b41
+	http://localhost:3005/kyc/callback
+	http://localhost:3005/kyc/webhook	
 
 
  KYC Service: 
+	docker compose down
+	docker compose up --build -d
+
     npm start dev    
 	
+ MinIO
+    docker compose up    
+     http://localhost:9000  		
+		
+		
+		
+		
+		
 		
 	Backend
 	http://localhost:3000

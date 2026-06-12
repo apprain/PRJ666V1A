@@ -55,4 +55,7 @@ export class KycDocument {
   @Column({ type: 'varchar', nullable: true })
   ocrDocumentNumber: string | null;
 
+  @Column({ type: 'date', nullable: true })
+  ocrDateOfBirth: Date | null;
+
 }

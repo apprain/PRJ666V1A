@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KYC Liveness</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial;
+    background: #f3f4f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    width: 350px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  h2 {
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+
+  .video-box {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #ddd;
+  }
+
+  video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  canvas {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 12px;
+    border: 2px dashed #ccc;
+    background: #fafafa;
+  }
+
+  .status {
+    margin-top: 10px;
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #eef2ff;
+    color: #333;
+  }
+
+  .btn {
+    margin-top: 12px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    background: #4f46e5;
+    color: white;
+    transition: 0.2s;
+  }
+
+  .btn:hover {
+    background: #4338ca;
+  }
+
+  .btn.secondary {
+    background: #e5e7eb;
+    color: #333;
+  }
+
+  .btn.secondary:hover {
+    background: #d1d5db;
+  }
+
+  .badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>KYC Liveness Check</h2>
+
+  <div class="video-box">
+    <video id="video" autoplay muted playsinline></video>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <div id="status" class="status">Initializing...</div>
+
+  <div id="badge" class="badge" style="display:none;">✔ Verified</div>
+
+  <button class="btn" onclick="resetCapture()">Retry</button>
+</div>
+
+<!-- KEEP YOUR JS SAME -->
+
+<script src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const statusText = document.getElementById('status');
+
+// Config
+const EAR_THRESHOLD = 0.3;
+let blinkFrames = 0;
+let blinkDetected = false;
+let captured = false;
+
+// Load Models
+async function loadModels() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri('models/tiny_face_detector');
+  await faceapi.nets.faceLandmark68Net.loadFromUri('models/face_landmark_68');
+  statusText.innerText = "Models loaded. Starting camera...";
+}
+
+// Start Camera
+async function startVideo() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+        width: { ideal: 320 },
+        height: { ideal: 240 }
+      },
+      audio: false
+    });
+
+    video.srcObject = stream;
+
+    await new Promise(resolve => {
+      video.onloadedmetadata = () => {
+        video.play();
+        resolve();
+      };
+    });
+
+    statusText.innerText = "Look straight and blink slowly";
+  } catch (e) {
+    console.error(e);
+    statusText.innerText = "Camera access failed";
+  }
+}
+
+// Eye ratio
+function getEyeAspectRatio(eye) {
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const A = dist(eye[1], eye[5]);
+  const B = dist(eye[2], eye[4]);
+  const C = dist(eye[0], eye[3]);
+  return (A + B) / (2.0 * C);
+}
+
+// Detect Blink
+function detectBlink() {
+  setInterval(async () => {
+
+    if (video.readyState < 2) return;
+
+    const detection = await faceapi
+      .detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions({
+          inputSize: 224,
+          scoreThreshold: 0.25
+        })
+      )
+      .withFaceLandmarks();
+
+    if (!detection) {
+      blinkFrames = 0;
+      statusText.innerText = "No face detected";
+      return;
+    }
+
+    const leftEye = detection.landmarks.getLeftEye();
+    const rightEye = detection.landmarks.getRightEye();
+
+    const EAR = (
+      getEyeAspectRatio(leftEye) +
+      getEyeAspectRatio(rightEye)
+    ) / 2;
+
+    // Debug info
+    statusText.innerText = `EAR: ${EAR.toFixed(2)} | Frames: ${blinkFrames}`;
+
+    // 🔹 Blink Logic
+    if (EAR < EAR_THRESHOLD) {
+      blinkFrames++;
+    } else {
+      if (blinkFrames >= 1 && !blinkDetected) {
+        blinkDetected = true;
+        statusText.innerText = "Blink detected ✔ Capturing...";
+        capture();blinkFrames = 0;
+      }
+      
+    }
+
+  }, 150);
+}
+
+// 🔹 Capture Image
+function capture() {
+  if (captured) return;
+
+  captured = true;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL("image/jpeg");
+
+  console.log("Captured Image:", imageData);
+
+  statusText.innerText = "Captured successfully ✔";
+
+  // Send to backend (ready)
+  /*
+  fetch('kyc.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image: imageData })
+  });
+  */
+}
+
+// 🔹 Reset
+function resetCapture() {
+  blinkFrames = 0;
+  blinkDetected = false;
+  captured = false;
+  statusText.innerText = "Reset done. Blink again.";
+}
+
+// 🔹 Init
+window.onload = async function () {
+  await loadModels();
+  await startVideo();
+  detectBlink();
+};
+</script>
+
+</body>
+</html>

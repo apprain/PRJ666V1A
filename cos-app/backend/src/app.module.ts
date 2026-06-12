@@ -11,6 +11,7 @@ import { KycModule } from './kyc/kyc.module';
 import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
 import { LeadsModule } from './leads/leads.module';
+import { AdminAuthModule } from './admin-auth/admin-auth.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { LeadsModule } from './leads/leads.module';
     AdminModule,
     AuditModule,
     LeadsModule,
+    AdminAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

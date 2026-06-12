@@ -47,9 +47,12 @@ services:
       - DB_NAME=kyc_service_db
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
+      - MINIO_PUBLIC_ENDPOINT=localhost
+      - MINIO_PUBLIC_PORT=9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=kyc-private
+      - PUBLIC_IMAGE_VIEW_ENDPOINT=https://localhost:4000
     depends_on:
       - postgres
       - minio

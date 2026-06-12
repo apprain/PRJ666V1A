@@ -1,0 +1,13 @@
+name: cos
+
+services:
+  cos-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cos-frontend
+    ports:
+      - "3005:3005"
+    env_file:
+      - .env
+    restart: unless-stopped

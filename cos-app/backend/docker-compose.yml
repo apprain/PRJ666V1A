@@ -1,0 +1,33 @@
+name: cos
+
+services:
+  cos-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cos-backend
+    ports:
+      - "3004:3004"
+    env_file:
+      - .env
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"      
+    depends_on:
+      - cos-postgres
+    restart: unless-stopped
+
+  cos-postgres:
+    image: postgres:16
+    container_name: cos-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: cosdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - cos_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  cos_postgres_data:

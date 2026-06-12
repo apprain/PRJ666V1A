@@ -63,16 +63,20 @@ export class MinioService {
     );
   }
 
+  async getObject(objectKey: string) {
+    return this.client.getObject(
+      process.env.MINIO_BUCKET || 'kyc-private',
+      objectKey,
+    );
+  }
+
   async getSignedUrl(
     objectKey: string,
     expirySeconds = 60 * 10,
   ) {
-    return this.client.presignedGetObject(
-      process.env.MINIO_BUCKET || 'kyc-private',
-      objectKey,
-      expirySeconds,
-    );
-  } 
+
+    return `${process.env.PUBLIC_IMAGE_VIEW_ENDPOINT}/kyc/files/view?key=${encodeURIComponent(objectKey)}`;
+  }
 
   async getObjectBuffer(objectKey: string): Promise<Buffer> {
     const stream = await this.client.getObject(
