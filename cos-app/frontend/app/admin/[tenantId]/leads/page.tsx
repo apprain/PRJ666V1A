@@ -107,9 +107,12 @@ export default function TenantLeadsPage() {
       <div className="mx-auto max-w-7xl rounded-2xl bg-white p-6 shadow">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Customer Origination System</h1>
-            <p className="mt-2 text-gray-600">
-              Tenant: <span className="font-semibold">{tenantId}</span>
+            <a href="/admin" className="text-sm text-green-600">
+              ← Back to Dashboard
+            </a>
+            <h1 className="mt-3 text-3xl font-bold">Loan Applications</h1>
+            <p className="mt-1 text-gray-600">
+              Review and manage loan account opening applications.
             </p>
           </div>
 
@@ -217,15 +220,10 @@ export default function TenantLeadsPage() {
                 {filteredLeads.map((lead) => (
                   <tr key={lead.id} className="hover:bg-gray-50">
                     <td className="border p-3">{lead.mobileNo}</td>
-
                     <td className="border p-3">{lead.fullName || "-"}</td>
-
                     <td className="border p-3">{lead.documentNumber || "-"}</td>
-
                     <td className="border p-3">{lead.kycStatus}</td>
-
                     <td className="border p-3">{lead.leadStatus}</td>
-
                     <td className="border p-3">
                       {lead.faceMatchStatus || "-"}
                     </td>
@@ -237,7 +235,7 @@ export default function TenantLeadsPage() {
                     <td className="border p-3 text-center">
                       <a
                         href={`/admin/${tenantId}/leads/${lead.id}`}
-                        className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                        className="rounded bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
                       >
                         View
                       </a>

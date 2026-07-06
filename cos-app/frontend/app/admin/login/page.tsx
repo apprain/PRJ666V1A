@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-//const API_URL = "http://localhost:3004";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function AdminLoginPage() {
@@ -35,7 +34,12 @@ export default function AdminLoginPage() {
     localStorage.setItem("tenant_id", data.tenantId);
     localStorage.setItem("admin_email", data.email);
 
-    window.location.href = `/admin/${data.tenantId}/leads`;
+    //window.location.href = `/admin/${data.tenantId}/leads`;
+
+    window.location.href = `/admin`;
+
+
+  
   };
 
   return (
@@ -69,7 +73,7 @@ export default function AdminLoginPage() {
 
         <button
           onClick={login}
-          className="w-full rounded bg-blue-600 p-3 font-semibold text-white"
+          className="w-full rounded bg-green-600 p-3 font-semibold text-white"
         >
           Sign In
         </button>

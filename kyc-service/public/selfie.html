@@ -371,8 +371,8 @@
 
         if (!detection || detection.detection.score < FACE_SCORE_THRESHOLD) {
           blinkFrames = 0;
-          setMessage("...", "warn");
-          //setMessage("No face detected", "warn");
+          //setMessage("...", "warn");
+          setMessage("No face detected", "warn");
           return;
         }
 

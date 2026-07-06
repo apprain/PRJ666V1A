@@ -34,7 +34,7 @@ services:
     restart: always
     ports:
       - "4000:4000"
-    command: npm run start:dev
+    command: npm run start:prod
     volumes:
       - .:/app
       - /app/node_modules
@@ -47,12 +47,12 @@ services:
       - DB_NAME=kyc_service_db
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
-      - MINIO_PUBLIC_ENDPOINT=localhost
+      - MINIO_PUBLIC_ENDPOINT=20.151.59.28
       - MINIO_PUBLIC_PORT=9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=password123
       - MINIO_BUCKET=kyc-private
-      - PUBLIC_IMAGE_VIEW_ENDPOINT=https://localhost:4000
+      - PUBLIC_IMAGE_VIEW_ENDPOINT=https://20.151.59.28:4000
     depends_on:
       - postgres
       - minio

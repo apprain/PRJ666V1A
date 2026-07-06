@@ -16,9 +16,10 @@
 
     body {
       font-family: Arial, sans-serif;
-      background: #f3f4f6;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
       width: 100vw;
       min-height: 100vh;
+      color: #111827;
     }
 
     .container {
@@ -32,17 +33,16 @@
 
     .card {
       width: 100%;
-      max-width: 520px;
+      max-width: 560px;
       background: white;
       border-radius: 24px;
       padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
     }
 
     h1 {
       text-align: center;
       font-size: 28px;
-      color: #111827;
       margin-bottom: 10px;
     }
 
@@ -56,7 +56,6 @@
 
     h2 {
       font-size: 20px;
-      color: #111827;
       margin-bottom: 16px;
     }
 
@@ -68,6 +67,7 @@
       font-size: 15px;
       color: #111827;
       line-height: 1.4;
+      font-weight: 600;
     }
 
     .success {
@@ -92,26 +92,60 @@
       border-radius: 16px;
       font-size: 16px;
       cursor: pointer;
-      background: #4f46e5;
+      background: #00975d;;
       color: white;
       margin-top: 22px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .btn:hover {
-      background: #4338ca;
+      background: #01784b;;
+    }
+
+    .btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .failure-actions {
+      display: none;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .failure-actions .btn {
+      margin-top: 0;
+    }
+
+    .btn.secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn.secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn.danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn.danger:hover {
+      background: #b91c1c;
     }
 
     @media (max-width: 480px) {
       .container {
-        padding: 12px;
+        padding: 0;
         align-items: stretch;
       }
 
       .card {
-        min-height: calc(100vh - 24px);
-        border-radius: 20px;
-        padding: 20px 16px;
+        min-height: 100vh;
+        border-radius: 0;
+        padding: 22px 16px;
+        box-shadow: none;
       }
 
       h1 {
@@ -125,6 +159,10 @@
       .status-box {
         font-size: 14px;
       }
+
+      .failure-actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -132,7 +170,6 @@
 <body>
 
   <div class="container">
-
     <div class="card">
 
       <h1>KYC Review</h1>
@@ -159,18 +196,104 @@
         Verification in progress...
       </div>
 
-      <button class="btn" onclick="startVerification()">
+      <button id="verifyBtn" class="btn" onclick="startVerification()">
         Start Background Verification
       </button>
 
-    </div>
+      <div id="failureActions" class="failure-actions">
+        <button class="btn secondary" onclick="goToFrontScan()">
+          Try Again
+        </button>
 
+        <button class="btn danger" onclick="continueSubmission()">
+          Continue Submission
+        </button>
+      </div>
+
+    </div>
   </div>
 
   <script>
     function getKycToken() {
       const params = new URLSearchParams(window.location.search);
       return params.get("token") || sessionStorage.getItem("kyc_token");
+    }
+
+    function showFailureOptions(message) {
+      const finalStatus = document.getElementById("finalStatus");
+      const verifyBtn = document.getElementById("verifyBtn");
+      const failureActions = document.getElementById("failureActions");
+
+      finalStatus.className = "status-box error";
+      finalStatus.innerText = message;
+
+      verifyBtn.style.display = "none";
+      failureActions.style.display = "flex";
+    }
+
+    function goToFrontScan() {
+      const token = getKycToken();
+
+      sessionStorage.removeItem("kyc_document_type");
+
+      if (!token) {
+        window.location.href = "/verify";
+        return;
+      }
+
+      window.location.href =
+        `/document-front.html?token=${encodeURIComponent(token)}`;
+    }
+
+    async function continueSubmission() {
+      const token = getKycToken();
+      const finalStatus = document.getElementById("finalStatus");
+      const failureActions = document.getElementById("failureActions");
+
+      if (!token) {
+        window.location.href = "/verify";
+        return;
+      }
+
+      failureActions.style.display = "none";
+
+      finalStatus.className = "status-box warning";
+      finalStatus.innerText = "Continuing submission for manual review...";
+
+      try {
+        const completeRes = await fetch(
+          `/api/v1/kyc/sessions/${token}/complete`,
+          {
+            method: "GET",
+          }
+        );
+
+        const completeData = await completeRes.json();
+
+        if (!completeRes.ok || !completeData.redirectUrl) {
+          finalStatus.className = "status-box error";
+          finalStatus.innerText =
+            "Unable to continue submission. Please try again.";
+          failureActions.style.display = "flex";
+          return;
+        }
+
+        finalStatus.className = "status-box success";
+        finalStatus.innerText =
+          "Submission continued successfully. Redirecting...";
+
+        setTimeout(() => {
+          window.location.href = completeData.redirectUrl;
+        }, 1000);
+
+      } catch (error) {
+        console.error(error);
+
+        finalStatus.className = "status-box error";
+        finalStatus.innerText =
+          "Unable to continue submission due to a system error.";
+        failureActions.style.display = "flex";
+      }
     }
 
     async function startVerification() {
@@ -180,6 +303,8 @@
       const ocrStatus = document.getElementById("ocrStatus");
       const livenessStatus = document.getElementById("livenessStatus");
       const finalStatus = document.getElementById("finalStatus");
+      const verifyBtn = document.getElementById("verifyBtn");
+      const failureActions = document.getElementById("failureActions");
 
       if (!token) {
         alert("KYC session expired or invalid");
@@ -188,15 +313,18 @@
       }
 
       try {
+        verifyBtn.disabled = true;
+        verifyBtn.innerText = "Verification Running...";
+        failureActions.style.display = "none";
+
         finalStatus.className = "status-box warning";
         finalStatus.innerText = "Running verification checks...";
 
-        // 1. Face Match
         faceStatus.className = "status-box warning";
         faceStatus.innerText = "Running face comparison...";
 
         const faceRes = await fetch(
-          `https://localhost:4000/api/v1/kyc/sessions/${token}/face-check-by-token`,
+          `/api/v1/kyc/sessions/${token}/face-check-by-token`,
           {
             method: "POST",
           }
@@ -204,14 +332,14 @@
 
         const faceData = await faceRes.json();
 
-        if (!faceData.matched) {
+        if (!faceRes.ok || !faceData.matched) {
           faceStatus.className = "status-box error";
           faceStatus.innerText =
             faceData.reason || "Face verification failed";
 
-          finalStatus.className = "status-box error";
-          finalStatus.innerText =
-            "Verification failed. Please retake your selfie or document photo.";
+          showFailureOptions(
+            "Face verification failed. You can try again or continue submission for manual review."
+          );
 
           return;
         }
@@ -220,12 +348,11 @@
         faceStatus.innerText =
           `Face matched successfully. Score: ${Number(faceData.similarity).toFixed(2)}%`;
 
-        // 2. OCR
         ocrStatus.className = "status-box warning";
         ocrStatus.innerText = "Extracting document information...";
 
         const ocrRes = await fetch(
-          `https://localhost:4000/api/v1/kyc/sessions/${token}/ocr-by-token`,
+          `/api/v1/kyc/sessions/${token}/ocr-by-token`,
           {
             method: "POST",
           }
@@ -233,32 +360,29 @@
 
         const ocrData = await ocrRes.json();
 
-        if (!ocrData.success) {
+        if (!ocrRes.ok || !ocrData.success) {
           ocrStatus.className = "status-box error";
           ocrStatus.innerText =
             ocrData.reason || "OCR extraction failed";
 
-          finalStatus.className = "status-box error";
-          finalStatus.innerText =
-            "Verification failed. Please upload a clearer document image.";
+          showFailureOptions(
+            "Document verification failed. You can try again with clearer images or continue submission for manual review."
+          );
 
           return;
         }
 
         ocrStatus.className = "status-box success";
-        ocrStatus.innerText =
-          `OCR completed. Extracted`;
+        ocrStatus.innerText = "OCR completed successfully.";
 
-        // 3. Liveness placeholder
         livenessStatus.className = "status-box success";
         livenessStatus.innerText = "Liveness verification passed";
 
-        // 4. Complete KYC
         finalStatus.className = "status-box warning";
         finalStatus.innerText = "Finalizing KYC session...";
 
         const completeRes = await fetch(
-          `https://localhost:4000/api/v1/kyc/sessions/${token}/complete`,
+          `/api/v1/kyc/sessions/${token}/complete`,
           {
             method: "GET",
           }
@@ -266,18 +390,28 @@
 
         const completeData = await completeRes.json();
 
+        if (!completeRes.ok || !completeData.redirectUrl) {
+          showFailureOptions(
+            "KYC completion failed. You can try again or continue submission for manual review."
+          );
+          return;
+        }
+
         finalStatus.className = "status-box success";
         finalStatus.innerText = "KYC verification completed successfully";
+
+        verifyBtn.innerText = "Completed";
 
         setTimeout(() => {
           window.location.href = completeData.redirectUrl;
         }, 1000);
+
       } catch (error) {
         console.error(error);
 
-        finalStatus.className = "status-box error";
-        finalStatus.innerText =
-          "Verification failed due to a system error. Please try again.";
+        showFailureOptions(
+          "Verification failed due to a system error. You can try again or continue submission for manual review."
+        );
       }
     }
   </script>

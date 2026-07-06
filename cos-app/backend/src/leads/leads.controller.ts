@@ -28,10 +28,10 @@ export class LeadsController {
         return this.leadsService.markOtpVerified(leadId);
     }
 
-    @Post('start-kyc')
-    startKyc(@Body('leadId') leadId: string) {
-        return this.leadsService.startKyc(leadId);
-    }
+    // @Post('start-kyc')
+    // startKyc(@Body('leadId') leadId: string) {
+    //     return this.leadsService.startKyc(leadId);
+    // }
 
     // @Post('complete-kyc')
     // completeKyc(@Body('leadId') leadId: string) {

@@ -1,3 +1,4 @@
+<!-- Full upgraded design with dotted guide box -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,37 +16,89 @@
 
     body {
       font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      width: 100vw;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
       min-height: 100vh;
+      color: #111827;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
     }
 
     .card {
       width: 100%;
-      min-height: 100vh;
-      background: white;
-      padding: 12px;
+      max-width: 560px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
       display: flex;
       flex-direction: column;
+      gap: 14px;
     }
 
-    h2 {
+    .header {
       text-align: center;
-      font-size: 22px;
-      margin: 10px 0 14px;
-      color: #111827;
+      padding: 8px 0;
+    }
+
+    .header h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .doc-select {
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #d1d5db;
+      font-size: 16px;
+      background: #fff;
+      outline: none;
+    }
+
+    .doc-select:focus {
+      border-color: #00975d;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+    }
+
+    .doc-select.error {
+      border-color: #dc2626;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+    }
+
+    .error-message {
+      color: #dc2626;
+      font-size: 13px;
+      margin-top: 6px;
+      min-height: 18px;
     }
 
     .video-box {
       width: 100%;
-      max-width: 520px;
-      height: 55vh;
-      margin: 0 auto;
+      height: 54vh;
+      max-height: 440px;
+      min-height: 330px;
       position: relative;
-      border-radius: 18px;
+      border-radius: 22px;
       overflow: hidden;
-      border: 2px solid #ddd;
-      background: black;
+      background: #020617;
+      border: 1px solid #e5e7eb;
     }
 
     video {
@@ -57,99 +110,154 @@
 
     .guide {
       position: absolute;
-      left: 6%;
-      top: 28%;
-      width: 88%;
-      height: 44%;
+      left: 7%;
+      top: 15%;
+      width: 86%;
+      height: 70%;
       border: 3px dashed #22c55e;
-      border-radius: 12px;
+      border-radius: 14px;
       pointer-events: none;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.28);
+      animation: pulse 2s infinite;
+    }
+
+    .guide::before {
+      content: "Align document inside this box";
+      position: absolute;
+      top: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22c55e;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    @keyframes pulse {
+      0% {
+        border-color: #22c55e;
+      }
+
+      50% {
+        border-color: #4ade80;
+      }
+
+      100% {
+        border-color: #22c55e;
+      }
     }
 
     canvas {
-      width: 100%;
-      max-width: 520px;
-      height: 150px;
-      margin: 14px auto 0;
-      display: block;
-      border-radius: 14px;
-      border: 2px dashed #ccc;
-      background: #fafafa;
+      display: none;
     }
 
     .status {
-      width: 100%;
-      max-width: 520px;
-      margin: 12px auto 0;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 13px;
+      border-radius: 14px;
       background: #eef2ff;
       text-align: center;
       font-size: 15px;
-      color: #111827;
+      color: #3730a3;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
     }
 
     .btn {
-      width: 100%;
-      max-width: 520px;
-      margin: 14px auto 0;
-      padding: 14px;
+      flex: 1;
+      padding: 15px;
       border: none;
-      border-radius: 14px;
+      border-radius: 15px;
       font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
-      background: #4f46e5;
+      background: #00975d;
       color: white;
     }
 
-    .btn.secondary {
-      background: #e5e7eb;
-      color: #333;
-      margin-top: 10px;
+    .btn:hover {
+      background: #018150;
     }
 
-    .doc-select {
-      width: 100%;
-      max-width: 520px;
-      margin: 0 auto 12px;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid #d1d5db;
-      font-size: 16px;
-      display: block;
+    .btn.secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn.secondary:hover {
+      background: #e5e7eb;
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 0;
+      }
+
+      .card {
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .video-box {
+        height: 52vh;
+        min-height: 300px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
+    <div class="card">
+      <div class="header">
+        <h2>Capture Document Front</h2>
+        <p>Select document type and place the front side inside the frame.</p>
+      </div>
 
-  <div class="card">
-    <h2>Capture Document Front</h2>
+      <div class="field">
+        <label for="documentType">Document Type</label>
+        <select id="documentType" class="doc-select">
+          <option value="">-- Select Document Type --</option>
+          <option value="NID">National ID</option>
+          <option value="SMART_CARD">Smart Card</option>
+          <option value="PASSPORT">Passport</option>
+          <option value="DRIVING_LICENSE">Driving License</option>
+        </select>
+        <div id="documentTypeError" class="error-message"></div>
+      </div>
 
-    <select id="documentType" class="doc-select">
-      <option value="NID">National ID</option>
-      <option value="PASSPORT">Passport</option>
-      <option value="DRIVING_LICENSE">Driving License</option>
-    </select>
+      <div class="video-box">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="guide"></div>
+      </div>
 
-    <div class="video-box">
-      <video id="video" autoplay muted playsinline></video>
-      <div class="guide"></div>
+      <canvas id="canvas"></canvas>
+
+      <div id="status" class="status">Starting camera...</div>
+
+      <div class="actions">
+        <button class="btn" onclick="captureDocumentFront()">Capture Front</button>
+        <button class="btn secondary" onclick="resetCapture()">Retry</button>
+      </div>
     </div>
-
-    <canvas id="canvas" style="display:none"></canvas>
-
-    <div id="status" class="status">Starting camera...</div>
-
-    <button class="btn" onclick="captureDocumentFront()">Capture Front</button>
-    <button class="btn secondary" onclick="resetCapture()">Retry</button>
   </div>
 
   <script>
     const documentTypeSelect = document.getElementById("documentType");
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const statusText = document.getElementById('status');
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const statusText = document.getElementById("status");
+    const errorDiv = document.getElementById("documentTypeError");
 
     let captured = false;
 
@@ -157,6 +265,11 @@
       const params = new URLSearchParams(window.location.search);
       return params.get("token") || sessionStorage.getItem("kyc_token");
     }
+
+    documentTypeSelect.addEventListener("change", () => {
+      documentTypeSelect.classList.remove("error");
+      errorDiv.innerText = "";
+    });
 
     async function startCamera() {
       try {
@@ -186,11 +299,25 @@
     }
 
     function captureDocumentFront() {
-
       const token = getKycToken();
+
       if (captured) return;
 
       const documentType = documentTypeSelect.value;
+
+      if (!documentType) {
+        documentTypeSelect.classList.add("error");
+        errorDiv.innerText = "Please select a document type.";
+        documentTypeSelect.focus();
+        return;
+      }
+
+      if (!token) {
+        alert("KYC session expired or invalid");
+        window.location.href = "/verify";
+        return;
+      }
+
       sessionStorage.setItem("kyc_document_type", documentType);
 
       captured = true;
@@ -205,34 +332,28 @@
 
       statusText.innerText = "Uploading document front...";
 
-      //https://localhost:4000/api/v1/kyc/sessions/d61497268ac68f0f93dc5de6ec364378aec3cda6e13d6b8c28585a21e5604acc/documents/front
-      //https://localhost:4000/api/v1/kyc/sessions/8e18a005441ea8be9b9a393ee77f9d484845aa7b5559bb9b8f38e511d8a55f64/documents/selfie
       fetch(`/api/v1/kyc/sessions/${token}/documents/front`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           image: imageData,
-          documentType: documentType,
-        }),
+          documentType: documentType
+        })
       })
         .then(res => res.json())
         .then(data => {
-          console.log('Document front upload success:', data);
+          console.log("Document front upload success:", data);
           statusText.innerText = "Document front uploaded successfully";
 
           setTimeout(() => {
-            if (!token) {
-              alert("KYC session expired or invalid");
-              window.location.href = "/verify";
-            }
             window.location.href = `/document-back.html?token=${encodeURIComponent(token)}`;
           }, 800);
         })
         .catch(err => {
           console.error(err);
-          statusText.innerText = "Upload failed";
+          statusText.innerText = "Upload failed. Please try again.";
           captured = false;
         });
     }
@@ -248,7 +369,6 @@
 
     window.onload = startCamera;
   </script>
-
 </body>
 
 </html>

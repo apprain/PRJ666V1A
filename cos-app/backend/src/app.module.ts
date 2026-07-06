@@ -12,6 +12,8 @@ import { AdminModule } from './admin/admin.module';
 import { AuditModule } from './audit/audit.module';
 import { LeadsModule } from './leads/leads.module';
 import { AdminAuthModule } from './admin-auth/admin-auth.module';
+import { BrokerageModule } from './brokerage/brokerage.module';
+import { LoanModule } from './loan/loan.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { AdminAuthModule } from './admin-auth/admin-auth.module';
     AuditModule,
     LeadsModule,
     AdminAuthModule,
+    BrokerageModule,
+    LoanModule,
   ],
   controllers: [AppController],
   providers: [AppService],

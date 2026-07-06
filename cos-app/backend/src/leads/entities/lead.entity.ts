@@ -6,10 +6,24 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { ProductType } from '../../common/enums/product-type.enum';
+
+// export enum ProductType {
+//   LOAN = 'LOAN',
+//   BROKERAGE = 'BROKERAGE',
+// }
+
 @Entity('leads')
 export class Lead {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({
+    type: 'enum',
+    enum: ProductType,
+    default: ProductType.LOAN,
+  })
+  productType: ProductType;
 
   @Column()
   tenantId: string;

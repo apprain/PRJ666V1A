@@ -7,6 +7,7 @@ export class OtpController {
 
     @Post('send')
     sendOtp(@Body('mobileNo') mobileNo: string) {
+        console.log('Received mobileNo:', mobileNo);
         return this.otpService.sendOtp(mobileNo);
     }
 

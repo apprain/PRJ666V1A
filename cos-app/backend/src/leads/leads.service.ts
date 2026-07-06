@@ -2,8 +2,12 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LeadKycData } from './entities/lead-kyc-data.entity';
-import { Lead } from './entities/lead.entity';
 import { LeadExtraData } from './entities/lead-extra-data.entity';
+import { Lead } from './entities/lead.entity';
+import { ProductType } from '../common/enums/product-type.enum';
+import { LeadStatus } from '../common/enums/lead-status.enum';
+import { KycStatus  } from '../common/enums/kyc-status.enum';
+
 
 @Injectable()
 export class LeadsService {
@@ -18,7 +22,12 @@ export class LeadsService {
         private leadExtraDataRepository: Repository<LeadExtraData>,
     ) { }
 
-    async startLead(tenantId: string, mobileNo: string) {
+    // async startLead(tenantId: string, mobileNo: string) {
+    async startLead(
+        tenantId: string,
+        mobileNo: string,
+        productType: ProductType = ProductType.LOAN,
+    ) {
         if (!tenantId || !mobileNo) {
             throw new BadRequestException('tenantId and mobileNo are required');
         }
@@ -30,12 +39,13 @@ export class LeadsService {
             },
         });
 
-        if (!lead) {
+        {
             lead = this.leadRepository.create({
                 tenantId,
                 mobileNo,
-                leadStatus: 'LEAD_CREATED',
-                kycStatus: 'NOT_STARTED',
+                productType,
+                leadStatus: LeadStatus.LEAD_CREATED,
+                kycStatus: KycStatus.NOT_STARTED,
             });
 
             await this.leadRepository.save(lead);
@@ -56,7 +66,7 @@ export class LeadsService {
             throw new BadRequestException('Lead not found');
         }
 
-        lead.leadStatus = 'OTP_VERIFIED';
+        lead.leadStatus = LeadStatus.OTP_VERIFIED;
         await this.leadRepository.save(lead);
 
         return {
@@ -64,73 +74,6 @@ export class LeadsService {
             lead,
         };
     }
-    async startKyc(leadId: string) {
-        const lead = await this.leadRepository.findOne({
-            where: { id: leadId },
-        });
-
-        if (!lead) {
-            throw new BadRequestException('Lead not found');
-        }
-
-        if (lead.leadStatus !== 'OTP_VERIFIED') {
-            throw new BadRequestException('OTP must be verified before starting KYC');
-        }
-
-        lead.leadStatus = 'KYC_STARTED';
-        lead.kycStatus = 'STARTED';
-        lead.kycSessionId = `mock-session-${Date.now()}`;
-
-        await this.leadRepository.save(lead);
-
-        return {
-            message: 'KYC started successfully',
-            leadId: lead.id,
-            kycSessionId: lead.kycSessionId,
-            verificationUrl: `${process.env.KYC_API_URL}/verify/${lead.kycSessionId}`,
-        };
-    }
-
-    // async completeKyc(leadId: string) {
-    //     const lead = await this.leadRepository.findOne({
-    //         where: { id: leadId },
-    //     });
-
-    //     if (!lead) {
-    //         throw new BadRequestException('Lead not found');
-    //     }
-
-    //     lead.leadStatus = 'PROFILE_ENRICHED';
-    //     lead.kycStatus = 'COMPLETED';
-
-    //     lead.fullName = 'Test Customer';
-    //     lead.documentNumber = 'NID123456789';
-    //     lead.dateOfBirth = '1990-01-01';
-    //     lead.address = 'Dhaka, Bangladesh';
-    //     lead.faceMatchScore = 96.5;
-    //     lead.faceMatchStatus = 'matched';
-
-    //     await this.leadRepository.save(lead);
-
-    //     const kycData = new LeadKycData();
-    //     kycData.leadId = lead.id;
-    //     kycData.kycSessionId = lead.kycSessionId;
-    //     kycData.extractedData = {
-    //         fullName: lead.fullName,
-    //         documentNumber: lead.documentNumber,
-    //         dateOfBirth: lead.dateOfBirth,
-    //         address: lead.address,
-    //     };
-    //     kycData.faceMatchScore = lead.faceMatchScore;
-    //     kycData.faceMatchStatus = lead.faceMatchStatus;
-
-    //     await this.leadKycDataRepository.save(kycData);
-
-    //     return {
-    //         message: 'KYC completed and lead profile updated',
-    //         lead,
-    //     };
-    // }
 
     async findAll() {
         return this.leadRepository.find({
@@ -255,8 +198,8 @@ export class LeadsService {
             throw new BadRequestException(data.message || 'Failed to start KYC');
         }
 
-        lead.leadStatus = 'KYC_STARTED';
-        lead.kycStatus = 'STARTED';
+        lead.leadStatus = LeadStatus.KYC_STARTED;
+        lead.kycStatus = KycStatus.STARTED;
         lead.kycSessionId = data.sessionId;
 
         await this.leadRepository.save(lead);
@@ -282,7 +225,7 @@ export class LeadsService {
         lead.documentNumber = body.documentNumber || lead.documentNumber;
         lead.dateOfBirth = body.dateOfBirth || lead.dateOfBirth;
         lead.address = body.address || lead.address;
-        lead.leadStatus = 'READY_FOR_REVIEW';
+        lead.leadStatus = LeadStatus.READY_FOR_REVIEW;
 
         await this.leadRepository.save(lead);
 
@@ -296,17 +239,17 @@ export class LeadsService {
             extra.tenantId = lead.tenantId;
         }
 
-        //const extra = new LeadExtraData();
+        const {
+            fullName,
+            documentNumber,
+            dateOfBirth,
+            address,
+            ...extraFields
+        } = body;
 
         extra.data = {
-            occupation: body.occupation,
-            employerName: body.employerName,
-            monthlyIncome: body.monthlyIncome,
-            loanAmount: body.loanAmount,
-            loanPurpose: body.loanPurpose,
-            currentAddress: body.currentAddress,
-            referenceName: body.referenceName,
-            referenceMobile: body.referenceMobile,
+            ...(extra.data || {}),
+            ...extraFields,
         };
 
         await this.leadExtraDataRepository.save(extra);
@@ -348,5 +291,48 @@ export class LeadsService {
         if (!objectKey) return null;
 
         return `${process.env.NEXT_PUBLIC_KYC_API_URL}/kyc/files/view?key=${encodeURIComponent(objectKey)}`;
+    }
+
+    async findByProductType(productType: ProductType) {
+        return this.leadRepository.find({
+            where: { productType },
+            order: {
+                createdAt: 'DESC',
+            },
+        });
+    }
+
+    async updateLeadStatus(id: string, status: string) {
+        const lead = await this.leadRepository.findOne({
+            where: { id },
+        });
+
+        if (!lead) {
+            throw new BadRequestException('Lead not found');
+        }
+
+        lead.leadStatus = status;
+
+        await this.leadRepository.save(lead);
+
+        return {
+            message: `Application ${status.toLowerCase()} successfully`,
+            lead,
+        };
+    }
+
+    async findApplications(
+        tenantId: string,
+        productType: ProductType,
+    ) {
+        return this.leadRepository.find({
+            where: {
+                tenantId,
+                productType,
+            },
+            order: {
+                createdAt: "DESC",
+            },
+        });
     }
 }

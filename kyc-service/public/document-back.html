@@ -15,37 +15,55 @@
 
     body {
       font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      width: 100vw;
+      background: linear-gradient(180deg, #eef2ff, #f8fafc);
       min-height: 100vh;
+      color: #111827;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px;
     }
 
     .card {
       width: 100%;
-      min-height: 100vh;
-      background: white;
-      padding: 12px;
+      max-width: 560px;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
       display: flex;
       flex-direction: column;
+      gap: 14px;
     }
 
-    h2 {
+    .header {
       text-align: center;
-      font-size: 22px;
-      margin: 10px 0 14px;
-      color: #111827;
+      padding: 8px 0;
+    }
+
+    .header h2 {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #6b7280;
     }
 
     .video-box {
       width: 100%;
-      max-width: 520px;
-      height: 55vh;
-      margin: 0 auto;
+      height: 54vh;
+      max-height: 440px;
+      min-height: 330px;
       position: relative;
-      border-radius: 18px;
+      border-radius: 22px;
       overflow: hidden;
-      border: 2px solid #ddd;
-      background: black;
+      background: #020617;
+      border: 1px solid #e5e7eb;
     }
 
     video {
@@ -57,97 +75,151 @@
 
     .guide {
       position: absolute;
-      left: 6%;
-      top: 28%;
-      width: 88%;
-      height: 44%;
+      left: 7%;
+      top: 15%;
+      width: 86%;
+      height: 70%;
       border: 3px dashed #22c55e;
-      border-radius: 12px;
+      border-radius: 14px;
       pointer-events: none;
+      box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.28);
+      animation: pulse 2s infinite;
+    }
+
+
+    .guide::before {
+      content: "Align document inside this box";
+      position: absolute;
+      top: -34px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22c55e;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    @keyframes pulse {
+      0% {
+        border-color: #22c55e;
+      }
+
+      50% {
+        border-color: #4ade80;
+      }
+
+      100% {
+        border-color: #22c55e;
+      }
     }
 
     canvas {
-      width: 100%;
-      max-width: 520px;
-      height: 150px;
-      margin: 14px auto 0;
-      display: block;
-      border-radius: 14px;
-      border: 2px dashed #ccc;
-      background: #fafafa;
+      display: none;
     }
 
     .status {
-      width: 100%;
-      max-width: 520px;
-      margin: 12px auto 0;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 13px;
+      border-radius: 14px;
       background: #eef2ff;
       text-align: center;
       font-size: 15px;
-      color: #111827;
+      color: #3730a3;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
     }
 
     .btn {
-      width: 100%;
-      max-width: 520px;
-      margin: 14px auto 0;
-      padding: 14px;
+      flex: 1;
+      padding: 15px;
       border: none;
-      border-radius: 14px;
+      border-radius: 15px;
       font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
-      background: #4f46e5;
+      background: #22c55e; 
       color: white;
     }
 
+    .btn:hover {
+      background: #00975d;
+    }
+
     .btn.secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn.secondary:hover {
       background: #e5e7eb;
-      color: #333;
-      margin-top: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 0;
+      }
+
+      .card {
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .video-box {
+        height: 52vh;
+        min-height: 300px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="page">
+    <div class="card">
+      <div class="header">
+        <h2>Capture Document Back</h2>
+        <p>Place the back side of your document inside the frame.</p>
+      </div>
 
-  <div class="card">
+      <div class="video-box">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="guide"></div>
+      </div>
 
-    <h2>Capture Document Back</h2>
+      <canvas id="canvas"></canvas>
 
-    <div class="video-box">
-      <video id="video" autoplay muted playsinline></video>
-      <div class="guide"></div>
+      <div id="status" class="status">Starting camera...</div>
+
+      <div class="actions">
+        <button class="btn" onclick="captureDocumentBack()">Capture Back</button>
+        <button class="btn secondary" onclick="resetCapture()">Retry</button>
+      </div>
     </div>
-
-    <canvas id="canvas" style="display:none"></canvas>
-
-    <div id="status" class="status">
-      Starting camera...
-    </div>
-
-    <button class="btn" onclick="captureDocumentBack()">
-      Capture Back
-    </button>
-
-    <button class="btn secondary" onclick="resetCapture()">
-      Retry
-    </button>
-
   </div>
 
   <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const statusText = document.getElementById('status');
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const statusText = document.getElementById("status");
 
     let captured = false;
 
+    function getKycToken() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("token") || sessionStorage.getItem("kyc_token");
+    }
+
     async function startCamera() {
-
       try {
-
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: "environment" },
@@ -166,113 +238,73 @@
           };
         });
 
-        statusText.innerText =
-          "Place document back inside the box";
-
+        statusText.innerText = "Place document back inside the box";
       } catch (e) {
-
         console.error(e);
-
-        statusText.innerText =
-          "Camera access failed";
+        statusText.innerText = "Camera access failed";
       }
     }
 
-    function getKycToken() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("token") || sessionStorage.getItem("kyc_token");
-    }
-
     function captureDocumentBack() {
-
       if (captured) return;
+
+      const token = getKycToken();
+
+      if (!token) {
+        alert("KYC session expired or invalid");
+        window.location.href = "/verify";
+        return;
+      }
 
       captured = true;
 
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      const token = getKycToken();
+
       const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      ctx.drawImage(
-        video,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
+      const imageData = canvas.toDataURL("image/jpeg", 0.9);
 
-      const imageData =
-        canvas.toDataURL("image/jpeg", 0.9);
-
-      statusText.innerText =
-        "Uploading document back...";
+      statusText.innerText = "Uploading document back...";
 
       fetch(`/api/v1/kyc/sessions/${token}/documents/back`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          image: imageData,
-        }),
+          image: imageData
+        })
       })
         .then(res => res.json())
         .then(data => {
+          console.log("Document back upload success:", data);
 
-          console.log(
-            'Document back upload success:',
-            data
-          );
-
-          statusText.innerText =
-            "Document back uploaded successfully";
+          statusText.innerText = "Document back uploaded successfully";
 
           setTimeout(() => {
-
-          
-            if (!token) {
-              alert("KYC session expired or invalid");
-              window.location.href = "/verify";
-            }
-
             window.location.href = `/review.html?token=${encodeURIComponent(token)}`;
-
-            //window.location.href = '/review.html';
           }, 800);
-
         })
         .catch(err => {
-
           console.error(err);
-
-          statusText.innerText =
-            "Upload failed";
-
+          statusText.innerText = "Upload failed. Please try again.";
           captured = false;
         });
     }
 
     function resetCapture() {
-
       captured = false;
 
       const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      statusText.innerText =
-        "Place document back inside the box";
+      statusText.innerText = "Place document back inside the box";
     }
 
     window.onload = startCamera;
   </script>
-
 </body>
 
 </html>

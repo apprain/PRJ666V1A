@@ -1,21 +1,40 @@
 "# PRJ566V1A" 
 
-Backend: 
-    cd Backend
-    npm install
-    npm run start:dev
+Off HTTPS:
+	$env:NODE_TLS_REJECT_UNAUTHORIZED="0"
+
+Access Db: docker exec -it kyc-postgres psql -U postgres -d kyc_service_db
+\dt                    -- List tables
+
+Docker Command:
+sudo docker compose down --remove-orphans
+sudo docker compose build --no-cache
+sudo docker compose up -d
+# View log
+sudo docker compose logs -f
+
+Statement
+	Backend: 
+		cd Backend : 3000
+		npm install
+		npm run start:dev
 
 
-frontned
-    npx next dev -p 3001
-    npx next start -p 3001    
+		frontned : 3001
+		npx next dev -p 3001
+		npx next start -p 3001    
+		
+		Name: statement
+		Client ID: app_28e03c1868d8cc8adc129e6a
+		Client Secret: secret_2c196bb850f5afab9f6bb008e460976188582917a3e78387
 	
 	
-KYC Admin Frontend:
+KYC Admin Frontend: 3003
   npx next dev -p 3003
   
   # Client admnin
   abccp@test.com/Admin@123
+  admin@test.com/Password123
   
   # Create System admnin
   docker exec -it kyc-postgres psql -U postgres -d kyc_service_db
@@ -43,15 +62,19 @@ KYC Admin Frontend:
   
   
 COS : Customer Origination System  
-    backend
-    npm start dev
-    frontend
+    backend : 3004
+       npm start dev
+	
+    frontend: 3005
 	npx next dev -p 3005
 	
 	Off HTTPS:
 	$env:NODE_TLS_REJECT_UNAUTHORIZED="0"
 	
-	Admin Link: http://localhost:3005/admin/login
+	COS:Customer Onboarding System
+	http://cos.apprain.ca
+	
+	Admin Link: http://cos.apprain.ca/admin/login
 	admin@abccp.com/Admin@12345
 	
 	INSERT INTO admin_users (
@@ -84,22 +107,37 @@ COS : Customer Origination System
 	Client Secret: secret_609b81ba7d7222ccd415077d60eacaa716c0c1d311981b41
 	http://localhost:3005/kyc/callback
 	http://localhost:3005/kyc/webhook	
+	
+	##Cloud Docker:
+	Name: abccp
+	Client ID: app_34fb2f7a2e0f230a757d07ff
+	Client Secret: secret_48f9511d8b9eaa44ee08742a22a57db77d1d7cb7ad6d9e35
+	http://20.151.59.28:3005/kyc/callback
+	http://20.151.59.28:3005/kyc/webhook
+	
 
-
- KYC Service: 
+ KYC Service: Port: 4000
 	docker compose down
 	docker compose up --build -d
-
     npm start dev    
 	
- MinIO
+	https://kyc.apprain.ca
+	
+	### Sandbox
+	Name: sandbox
+	Client ID: app_43bfa1bacf4435bfc2405459
+	Client Secret: secret_75f1d4deec9274c35c65a8744146d5406e19e16d167e8d3f
+	https://localhost/kyc/callback
+	https://localhost/api/kyc/webhook
+	
+	
+	
+	
+ MinIO: 9000
     docker compose up    
      http://localhost:9000  		
-		
-		
-		
-		
-		
+     http://20.151.59.28:9000  	
+ 
 		
 	Backend
 	http://localhost:3000
@@ -119,10 +157,24 @@ COS : Customer Origination System
 	
 	http://20.151.59.28:3001/
 	
+	COS: 
+	http://20.151.59.28:3005/  font
+	http://20.151.59.28:3004/  back
+	http://20.151.59.28:3005/admin/login
+	
+	https://cos.apprain.ca  front
+	https://cos.apprain.ca/admin/login  admin
+	https://cos.service.apprain.ca back
+	
 	KYC Admin Frontend:
 	http://localhost:3003/client-admin/login
-	
 	http://localhost:3003/system-admin/login
+	
+	https://verify.apprain.ca/client-admin/login
+	abccp@test.com/Admin@123
+	
+	https://verify.apprain.ca/system-admin/login
+	admin@kyc.com/Admin@123
 	
 	
 	Desklocator
@@ -142,3 +194,9 @@ VM Setup Azure: (Manika Account):
 
 ################ KYC INTEGRATION ###############
 
+corp@test.com
+1
+admin@test.com/Admin@123
+
+
+https://github.com/apprain/kyc

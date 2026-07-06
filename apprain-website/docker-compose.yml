@@ -1,0 +1,7 @@
+services:
+  apprain-website:
+    build: .
+    container_name: apprain-website
+    ports:
+      - "3006:3006"
+    restart: always

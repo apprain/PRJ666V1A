@@ -82,7 +82,7 @@ export class KycSessionService {
         return {
             sessionId: saved.id,
             token: saved.token,
-            verificationUrl: `https://localhost:4000/verify/${saved.token}`,
+            verificationUrl: `${process.env.PUBLIC_KYC_URL}/verify/${saved.token}`,
             expiresAt: saved.expiresAt,
             status: saved.status,
         };
@@ -252,58 +252,7 @@ export class KycSessionService {
         return this.compareSessionFaces(session.id);
     }
 
-    /*
-    async extractDocumentText(sessionId: string) {
 
-        const front = await this.kycDocumentRepo.findOne({
-            where: {
-                session: { id: sessionId },
-                documentType: 'doc-front',
-            },
-            relations: ['session'],
-            order: {
-                createdAt: 'DESC',
-            },
-        });
-
-        if (!front) {
-            return {
-                success: false,
-                reason: 'Document front not found',
-                fullText: '',
-                lines: [],
-            };
-        }
-
-        const buffer = await this.minioService.getObjectBuffer(
-            front.minioObjectKey,
-        );
-
-        const ocrResult =
-            await this.awsTextractService.extractTextFromBuffer(buffer);
-
-        const lines = (ocrResult.lines || []).map(
-            (line) => line || '',
-        );
-
-        front.ocrFullText = ocrResult.fullText || '';
-        front.ocrLines = lines;
-        front.ocrFirstName = lines[1] || null;
-        front.ocrLastName = lines[2] || null;
-        front.ocrDocumentNumber = lines[3] || null;
-        front.ocrCheckedAt = new Date();
-        console.log(front);
-        await this.kycDocumentRepo.save(front);
-
-        return {
-            ...ocrResult,
-            extracted: {
-                firstName: front.ocrFirstName,
-                lastName: front.ocrLastName,
-                documentNumber: front.ocrDocumentNumber,
-            },
-        };
-    }*/
 
     async extractDocumentText(sessionId: string) {
         const front = await this.kycDocumentRepo.findOne({
@@ -376,6 +325,10 @@ export class KycSessionService {
             return this.parseCanadianDriverLicense(lines);
         }
 
+        if (documentType === 'SMART_CARD') {
+            return this.parseBangladeshSmartCard(lines);
+        }
+
         if (documentType === 'PASSPORT') {
             return this.parseBangladeshPassport(lines);
         }
@@ -433,6 +386,87 @@ export class KycSessionService {
             expiryDate: expiryMatch ? expiryMatch[1] : null,
         };
     }
+
+    private parseBangladeshSmartCard(lines: string[]) {
+        const cleanLines = lines
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        const allText = cleanLines.join(' ');
+
+        let fullName: string | null = null;
+        let documentNumber: string | null = null;
+        let dateOfBirth: string | null = null;
+
+        // Name: usually next line after "Name"
+        const nameIndex = cleanLines.findIndex(line =>
+            line.toLowerCase().trim() === 'name'
+        );
+
+        if (nameIndex !== -1 && cleanLines[nameIndex + 1]) {
+            fullName = cleanLines[nameIndex + 1].trim();
+        }
+
+        // DOB: Date of Birth 11 Dec 1977
+        const dobMatch = allText.match(
+            /date\s*of\s*birth\s*[:\-]?\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})/i
+        );
+
+        if (dobMatch) {
+            dateOfBirth = dobMatch[1].trim();
+        }
+
+        // NID Number:
+        // Handles:
+        // "as 3017 will NO No 597 941 7192"
+        // "NO No", "597 941 7192"
+        // "- - - - de ND No.", "597 941 7192"
+        const noIndex = cleanLines.findIndex(line =>
+            /(no|nd)\s*no/i.test(line)
+        );
+
+        if (noIndex !== -1) {
+            const possibleLines = [
+                cleanLines[noIndex],
+                cleanLines[noIndex + 1] || '',
+                cleanLines[noIndex - 1] || '',
+            ].join(' ');
+
+            const digits = possibleLines.replace(/\D/g, '');
+
+            if (digits.length >= 10) {
+                documentNumber = digits.slice(-10);
+            }
+        }
+
+        // Fallback: find the last 10 digit number in the whole OCR text
+        if (!documentNumber) {
+            const digits = allText.replace(/\D/g, '');
+
+            if (digits.length >= 10) {
+                documentNumber = digits.slice(-10);
+            }
+        }
+
+        const nameParts = fullName ? fullName.split(/\s+/) : [];
+
+        return {
+            firstName:
+                nameParts.length > 1
+                    ? nameParts.slice(0, -1).join(' ')
+                    : fullName,
+
+            lastName:
+                nameParts.length > 1
+                    ? nameParts[nameParts.length - 1]
+                    : null,
+
+            fullName,
+            documentNumber,
+            dateOfBirth,
+        };
+    }
+
 
     private parseCanadianDriverLicense(lines: string[]) {
         const cleanLines = lines
