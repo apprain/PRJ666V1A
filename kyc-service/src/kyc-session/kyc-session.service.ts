@@ -42,7 +42,7 @@ export class KycSessionService {
             await this.clientAppService.findByClientId(clientId);
 
         if (!clientApp) {
-            throw new UnauthorizedException('Invalid clientId');
+            throw new UnauthorizedException('Invalid clientId' + clientId);
         }
 
         const isValidSecret = await bcrypt.compare(

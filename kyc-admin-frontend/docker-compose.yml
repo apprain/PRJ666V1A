@@ -3,10 +3,13 @@ services:
     build:
       context: .
       args:
-        NEXT_PUBLIC_KYC_API_URL: https://20.151.59.28:4000
+        NEXT_PUBLIC_KYC_API_URL: https://kyc.apprain.ca
+
     container_name: kyc-admin-frontend
-    restart: always
+    restart: unless-stopped
+
     ports:
-      - "3003:3003"
+      - "127.0.0.1:3003:3003"
+
     environment:
-      - NEXT_PUBLIC_KYC_API_URL=https://20.151.59.28:4000
+      NEXT_PUBLIC_KYC_API_URL: https://kyc.apprain.ca

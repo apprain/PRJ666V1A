@@ -1,5 +1,7 @@
 version: "3.8"
 
+name: kyc
+
 services:
   postgres:
     image: postgres:16
@@ -13,7 +15,7 @@ services:
       POSTGRES_DB: kyc_service_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      
 
   minio:
     image: minio/minio
@@ -35,9 +37,6 @@ services:
     ports:
       - "4000:4000"
     command: npm run start:prod
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
       - PORT=4000
       - DB_HOST=postgres
@@ -47,12 +46,13 @@ services:
       - DB_NAME=kyc_service_db
       - MINIO_ENDPOINT=minio
       - MINIO_PORT=9000
-      - MINIO_PUBLIC_ENDPOINT=20.151.59.28
+      
       - MINIO_PUBLIC_PORT=9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=password123
-      - MINIO_BUCKET=kyc-private
-      - PUBLIC_IMAGE_VIEW_ENDPOINT=https://20.151.59.28:4000
+      - MINIO_BUCKET=kyc-private     
+      - MINIO_PUBLIC_ENDPOINT=kyc.apprain.ca
+      - PUBLIC_IMAGE_VIEW_ENDPOINT=https://kyc.apprain.ca
     depends_on:
       - postgres
       - minio

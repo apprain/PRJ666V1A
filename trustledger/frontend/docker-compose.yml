@@ -1,0 +1,22 @@
+name: trustledger-frontend
+
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SERVICE_URL: https://trustledger.apprain.ca
+
+    container_name: trustledger-frontend
+
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:3001:3001"
+
+    environment:
+      NEXT_PUBLIC_SERVICE_URL: https://trustledger.apprain.ca
+      NEXT_PUBLIC_KYC_API_URL: https://kyc.apprain.ca
+
+
+      

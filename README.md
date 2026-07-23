@@ -4,16 +4,86 @@ Off HTTPS:
 	$env:NODE_TLS_REJECT_UNAUTHORIZED="0"
 
 Access Db: docker exec -it kyc-postgres psql -U postgres -d kyc_service_db
+Access Db: docker exec -it task-postgres psql -U postgres -d taskdb
 \dt                    -- List tables
 
 Docker Command:
 sudo docker compose down --remove-orphans
 sudo docker compose build --no-cache
 sudo docker compose up -d
-# View log
-sudo docker compose logs -f
+
+docker compose down --remove-orphans
+docker compose build --no-cache
+docker compose up -d
+
+#Kakra Collection
+20.151.59.28:5000
+
+Front 
+ npm run dev
+
+npm run build  
+
+
+
+Backend
+npm run start:dev
+
+
+Run seed:
+npm run seed
+
+
+Crate Store
+sudo docker exec -it kakra-postgres psql -U postgres -d kakra_db
+INSERT INTO stores (
+  id,
+  name,
+  slug,
+  domain,
+  database_name,
+  database_host,
+  database_port,
+  database_user,
+  database_password,
+  theme,
+  currency,
+  language,
+  timezone,
+  active,
+  created_at,
+  updated_at
+)
+VALUES (
+  gen_random_uuid(),
+  'Kakra Local',
+  'kakra-local',
+  'localhost',
+  'kakra_db',
+  'localhost',
+  5435,
+  'postgres',
+  'postgres',
+  'default',
+  'CAD',
+  'en',
+  'America/Toronto',
+  true,
+  now(),
+  now()
+);
+
+
 
 Statement
+	demouser:
+			Customer:
+			reazulk@gmail.com
+			Aa123456
+			
+			https://trustledger.apprain.ca/share/verify/6d3cde39-5913-488b-b98e-eb779a8ca3f9
+
+
 	Backend: 
 		cd Backend : 3000
 		npm install
@@ -27,6 +97,13 @@ Statement
 		Name: statement
 		Client ID: app_28e03c1868d8cc8adc129e6a
 		Client Secret: secret_2c196bb850f5afab9f6bb008e460976188582917a3e78387
+		
+		sudo docker exec -it task-postgres psql -U postgres -d taskdb
+		\dt
+		
+		
+		
+		
 	
 	
 KYC Admin Frontend: 3003
@@ -37,7 +114,7 @@ KYC Admin Frontend: 3003
   admin@test.com/Password123
   
   # Create System admnin
-  docker exec -it kyc-postgres psql -U postgres -d kyc_service_db
+  docker exec -it kyc-postgres psql -U postgres -d kyc_service_dbdocker exec -it kyc-postgres psql -U postgres -d kyc_service_db
   \dt
   
   Gen Password
