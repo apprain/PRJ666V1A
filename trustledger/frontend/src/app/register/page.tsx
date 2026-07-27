@@ -134,7 +134,7 @@ export default function RegisterPage() {
     process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:3000";
 
   const kycApiUrl =
-    process.env.NEXT_PUBLIC_KYC_API_URL || "http://localhost:4000";
+    process.env.NEXT_PUBLIC_KYC_API_URL || "https://kyc.apprain.ca";
 
   const [step, setStep] = useState<Step>("mobile");
 

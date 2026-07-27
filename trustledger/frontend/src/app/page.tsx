@@ -203,9 +203,9 @@ export default function Home() {
             </div>
 
             <h1 className="mt-7 max-w-3xl text-5xl font-bold leading-[1.04] tracking-tight text-[#101828] sm:text-6xl">
-              Share Your Financial Statements
+              Bank-to-Bank Statement Verification
               <span className="mt-2 block text-[#3caf4b]">
-                Quickly and Securely
+                Fast, Secure & Consent-Based
               </span>
             </h1>
 

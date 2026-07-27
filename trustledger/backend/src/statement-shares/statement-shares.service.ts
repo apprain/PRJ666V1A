@@ -1,7 +1,10 @@
 import {
+    BadRequestException,
     Injectable,
+    NotFoundException,
     UnauthorizedException,
 } from "@nestjs/common";
+
 import { User } from "../users/user.entity";
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomUUID } from 'crypto';
@@ -10,6 +13,7 @@ import { CreateStatementShareDto } from './dto/create-statement-share.dto';
 import { StatementShare } from './statement-share.entity';
 import { Response } from 'express';
 import PDFDocument from "pdfkit";
+
 
 @Injectable()
 export class StatementSharesService {
@@ -296,6 +300,33 @@ export class StatementSharesService {
         res.setHeader("Content-Length", pdfBuffer.length);
 
         return res.end(pdfBuffer);
+    }
+
+    async findSentByOrganization(userId: number) {
+        const user = await this.userRepo.findOne({
+            where: { id: userId },
+        });
+
+        if (!user?.organizationId) {
+            throw new BadRequestException(
+                "Organization access is required.",
+            );
+        }
+
+        console.log(user.organizationId);
+
+        return this.statementShareRepo.find({
+            where: {
+                sharedByOrganizationId: user.organizationId,
+            },
+            relations: {
+                organization: true,
+                sharedByOrganization: true,
+            },
+            order: {
+                createdAt: "DESC",
+            },
+        });
     }
 
 }

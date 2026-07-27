@@ -10,6 +10,7 @@ import { UsersModule } from "./users/users.module";
 import { StatementSharesModule } from "./statement-shares/statement-shares.module";
 import { OrganizationsModule } from "./organizations/organizations.module";
 import { KycModule } from './kyc/kyc.module';
+import { StatementRequestsModule } from './statement-requests/statement-requests.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { KycModule } from './kyc/kyc.module';
     UsersModule,
     StatementSharesModule,
     OrganizationsModule,
+    StatementRequestsModule,
   ],
 
   controllers: [AppController],

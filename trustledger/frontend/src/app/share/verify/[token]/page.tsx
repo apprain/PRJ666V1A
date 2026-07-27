@@ -498,7 +498,7 @@ export default function VerifySharePage() {
                   type="button"
                   onClick={() =>
                     openPdf(
-                      "DBR Calculation",
+                      "Statement Analysis",
                       `${appUrl}/sample-dbr.pdf`,
                       // Later:
                       // `${serviceUrl}/statement-shares/preview-dbr/${token}`
@@ -507,7 +507,7 @@ export default function VerifySharePage() {
                   className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#39aa43] bg-white px-6 py-3.5 text-sm font-bold text-[#39aa43] transition hover:bg-green-50"
                 >
                   <Icon name="check" className="h-5 w-5" />
-                  Preview DBR Calculation
+                  Statement Analysis
                 </button>
               </div>
 

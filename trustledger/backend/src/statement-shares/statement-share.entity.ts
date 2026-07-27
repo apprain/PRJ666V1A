@@ -1,4 +1,5 @@
 import { Organization } from "../organizations/organization.entity";
+
 import {
     Column,
     CreateDateColumn,
@@ -50,4 +51,11 @@ export class StatementShare {
 
     @Column()
     attemptsRemain: number;
+
+    @Column({ type: "uuid", nullable: true })
+    sharedByOrganizationId?: string;
+
+    @ManyToOne(() => Organization, { nullable: true })
+    @JoinColumn({ name: "sharedByOrganizationId" })
+    sharedByOrganization?: Organization;
 }

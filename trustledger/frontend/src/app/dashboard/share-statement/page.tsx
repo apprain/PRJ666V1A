@@ -157,10 +157,18 @@ export default function ShareStatementPage() {
   const [organizationsError, setOrganizationsError] = useState("");
   const [generatedToken, setGeneratedToken] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState("");
+  const [previewTitle, setPreviewTitle] = useState("");
 
   const serviceUrl =
     process.env.NEXT_PUBLIC_SERVICE_URL || "http://localhost:3000";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001";
+
+  function openPdfPreview(title: string, url: string) {
+    setPreviewTitle(title);
+    setPreviewPdfUrl(url);
+    setPreviewOpen(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -865,7 +873,9 @@ export default function ShareStatementPage() {
 
                       <button
                         type="button"
-                        onClick={() => setPreviewOpen(true)}
+                        onClick={() =>
+                          openPdfPreview("View Bank Statement", "/sample.pdf")
+                        }
                         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#39aa43] bg-white px-4 py-3 text-sm font-bold text-[#29953a] transition hover:bg-[#f1fbf3]"
                       >
                         <Icon name="download" className="h-5 w-5" />
@@ -886,7 +896,30 @@ export default function ShareStatementPage() {
         </div>
       </section>
 
-      {previewOpen && generatedToken && (
+      {previewOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4">
+          <div className="flex h-[94vh] w-full max-w-7xl flex-col overflow-hidden rounded-3xl bg-white">
+            <div className="flex items-center justify-between border-b px-6 py-4">
+              <h2 className="text-xl font-bold">{previewTitle}</h2>
+
+              <button
+                onClick={() => setPreviewOpen(false)}
+                className="rounded-lg border px-4 py-2"
+              >
+                Close
+              </button>
+            </div>
+
+            <iframe
+              src={previewPdfUrl}
+              className="h-full w-full"
+              title={previewTitle}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* {previewOpen && generatedToken && (
         <div
           className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm"
           role="dialog"
@@ -932,7 +965,7 @@ export default function ShareStatementPage() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </main>
   );
 }

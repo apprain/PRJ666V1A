@@ -85,4 +85,12 @@ export class StatementSharesController {
             req.user.userId,
         );
     }
+
+    @Get("sent-by-organization")
+    @UseGuards(JwtAuthGuard)
+    findSentByOrganization(@Req() req: any) {
+        return this.statementSharesService.findSentByOrganization(
+            req.user.userId,
+        );
+    }
 }

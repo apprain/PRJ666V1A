@@ -32,6 +32,10 @@ npm run start:dev
 
 Run seed:
 npm run seed
+:Insode docker
+docker exec -it kakra-backend \
+  node dist/database/seeds/seed.js
+  
 
 
 Crate Store
@@ -266,6 +270,9 @@ VM Setup Azure: (Manika Account):
    
   ssh prj666gr1@20.151.59.28
   prj666project@2026
+  
+  ssh azureuser@20.63.99.152
+  @ppRain#162341#2026
 
 
 
