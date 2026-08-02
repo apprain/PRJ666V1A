@@ -4,12 +4,6 @@ import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "../users/users.service";
 import { OrganizationsService } from "../organizations/organizations.service";
 
-// import { BadRequestException, Injectable } from "@nestjs/common";
-// import * as bcrypt from 'bcrypt';
-// import { JwtService } from '@nestjs/jwt';
-// import { UsersService } from '../users/users.service';
-// import { OrganizationsService } from "../organizations/organizations.service";
-
 @Injectable()
 export class AuthService {
 
@@ -26,26 +20,6 @@ export class AuthService {
       expiresAt: number;
     }
   >();
-
-  // async register(email: string, password: string) {
-
-  //   const existingUser =
-  //     await this.usersService.findByEmail(email);
-
-  //   if (existingUser) {
-  //     return {
-  //       message: 'User already exists',
-  //     };
-  //   }
-
-  //   const hashedPassword =
-  //     await bcrypt.hash(password, 10);
-
-  //   return await this.usersService.createUser(
-  //     email,
-  //     hashedPassword,
-  //   );
-  // }
 
   async register(
     email: string,
@@ -132,44 +106,6 @@ export class AuthService {
     };
   }
 
-
-
-  // async login(email: string, password: string) {
-
-  //   const user =
-  //     await this.usersService.findByEmail(email);
-
-  //   if (user.organizationId) {
-  //     return {
-  //       message: "Please use the organization login page.",
-  //     };
-  //   }
-
-  //   if (!user) {
-  //     return {
-  //       message: 'Invalid email',
-  //     };
-  //   }
-
-  //   const passwordMatched =
-  //     await bcrypt.compare(password, user.password);
-  //   if (!passwordMatched) {
-  //     return {
-  //       message: 'Invalid password',
-  //     };
-  //   }
-
-  //   const payload = {
-  //     sub: user.id,
-  //     email: user.email,
-  //   };
-
-  //   return {
-  //     access_token:
-  //       await this.jwtService.signAsync(payload),
-  //   };
-  // }
-
   async login(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
@@ -207,49 +143,6 @@ export class AuthService {
       accountType: "customer",
     };
   }
-
-  // async corplogin(email: string, password: string) {
-  //   const user = await this.usersService.findByEmail(email);
-
-  //   if (!user) {
-  //     return {
-  //       message: "Invalid email",
-  //     };
-  //   }
-
-  //   const passwordMatched = await bcrypt.compare(
-  //     password,
-  //     user.password,
-  //   );
-
-  //   if (!passwordMatched) {
-  //     return {
-  //       message: "Invalid password",
-  //     };
-  //   }
-
-  //   if (!user.organizationId) {
-  //     return {
-  //       message: "This account is not connected to an organization.",
-  //     };
-  //   }
-
-  //   const payload = {
-  //     sub: user.id,
-  //     email: user.email,
-  //     organizationId: user.organizationId,
-  //   };
-
-  //   return {
-  //     access_token: await this.jwtService.signAsync(payload),
-  //     user: {
-  //       id: user.id,
-  //       email: user.email,
-  //       organizationId: user.organizationId,
-  //       organization: user.organization,
-  //     },
-  //   };
-  // }
 
   async corpLogin(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -297,44 +190,6 @@ export class AuthService {
       },
     };
   }
-
-  // async corplogin(email: string, password: string) {
-
-  //   const user =
-  //     await this.usersService.findByEmail(email);
-
-  //   if (!user) {
-  //     return {
-  //       message: 'Invalid email',
-  //     };
-  //   }
-
-  //   const passwordMatched =
-  //     await bcrypt.compare(password, user.password);
-
-  //   if (!passwordMatched) {
-  //     return {
-  //       message: 'Invalid password',
-  //     };
-  //   }
-  //   if (!user.organizationId) {
-  //     return {
-  //       message: 'Organization login is requited to download statement.',
-  //     };
-  //   }
-
-  //   //console.log(user.organizationname);
-  //   const payload = {
-  //     sub: user.id,
-  //     email: user.email,
-  //     organizationId: user.organizationId,
-  //   };
-
-  //   return {
-  //     access_token:
-  //       await this.jwtService.signAsync(payload),
-  //   };
-  // }
 
   async sendOtp(mobile: string) {
     const otp = Math.floor(

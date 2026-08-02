@@ -12,9 +12,8 @@ sudo docker compose down --remove-orphans
 sudo docker compose build --no-cache
 sudo docker compose up -d
 
-docker compose down --remove-orphans
-docker compose build --no-cache
-docker compose up -d
+cd /opt/apprain/repos/kyc/backend/
+sudo docker compose up -d
 
 #Kakra Collection
 20.151.59.28:5000
@@ -79,13 +78,20 @@ VALUES (
 
 
 
-Statement
+Statement: trustledger
 	demouser:
 			Customer:
 			reazulk@gmail.com
 			Aa123456
 			
 			https://trustledger.apprain.ca/share/verify/6d3cde39-5913-488b-b98e-eb779a8ca3f9
+			
+			dbbl@test.com
+			Aa123456
+			
+			city@test.com
+			Aa123456
+			
 
 
 	Backend: 
@@ -103,7 +109,14 @@ Statement
 		Client Secret: secret_2c196bb850f5afab9f6bb008e460976188582917a3e78387
 		
 		sudo docker exec -it task-postgres psql -U postgres -d taskdb
+		sudo docker exec -it trustledger-postgres psql -U postgres -d trustledgerdb
 		\dt
+		
+		sharedByOrganizationId='775cbe60-848d-4663-986b-c6f4137ea4c4'
+		
+		
+		
+		
 		
 		
 		
@@ -274,7 +287,15 @@ VM Setup Azure: (Manika Account):
   ssh azureuser@20.63.99.152
   @ppRain#162341#2026
 
+###############################  Desklocator ##
+    cd Backend : 3000
+	npm install
+	npm run start:dev
 
+
+	frontned : 3001
+	npx next dev -p 3001
+		
 
 ################ KYC INTEGRATION ###############
 

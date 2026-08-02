@@ -11,9 +11,11 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", href: "/organization/dashboard" },
+  { label: "Received Statement", href: "/organization/statement-requests" },
+  { label: "Statements Requests", href: "/organization/sent-statements" },
   { label: "Shared Statements", href: "/organization/shared-statements" },
-  { label: "Requested Statement List", href: "/organization/statement-requests" },
-  { label: "Sent Statements", href: "/organization/sent-statements" },
+ 
+ 
 ];
 
 export default function OrganizationLayout({
@@ -132,7 +134,7 @@ export default function OrganizationLayout({
               href="/organization/request-statement"
               className="flex w-full items-center justify-center rounded-xl bg-[#39aa43] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#31993a]"
             >
-              Request a Statement
+              New Statement Request 
             </Link>
           </div>
         </aside>

@@ -26,6 +26,9 @@ const items = [
 ];
 
 export default function OrganizationDashboardPage() {
+
+  const storedOrganizationName = localStorage.getItem("organizationName");
+
   return (
     <main className="px-5 py-8 sm:px-8 sm:py-10">
       <div className="max-w-3xl">
@@ -34,7 +37,7 @@ export default function OrganizationDashboardPage() {
         </p>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-          Organization Dashboard
+          {storedOrganizationName} Dashboard
         </h1>
 
         <p className="mt-3 leading-7 text-slate-600">

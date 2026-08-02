@@ -230,7 +230,7 @@ export default function SharedStatementsPage() {
                           href={`/share/verify/${statement.token}`}
                           className="rounded-lg bg-[#39aa43] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#31993a]"
                         >
-                          View Statement
+                          View
                         </Link>
                       </td>
                     </tr>

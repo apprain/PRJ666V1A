@@ -283,7 +283,7 @@ export default function CorpRegisterPage() {
             href="/corp-login"
             className="rounded-lg border border-[#39aa43] bg-white px-4 py-2.5 text-sm font-semibold text-[#29953a] transition hover:bg-[#f1fbf3]"
           >
-            Organization Login
+            Bank Login
           </Link>
         </div>
       </header>
@@ -333,7 +333,7 @@ export default function CorpRegisterPage() {
             </p>
 
             <h1 className="mt-2 text-3xl font-bold tracking-tight">
-              Organization Registration
+              Bank Registration
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">

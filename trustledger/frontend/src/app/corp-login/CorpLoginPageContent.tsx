@@ -126,7 +126,16 @@ export default function CorpLoginPageContent() {
       let data: {
         access_token?: string;
         message?: string;
-        user?: { id?: number; email?: string; organizationId?: string };
+        user?: {
+          id?: number;
+          email?: string;
+          organizationId?: string;
+          organization?: {
+            id?: string;
+            name?: string;
+            email?: string;
+          };
+        };
       } = {};
 
       try {
@@ -148,7 +157,15 @@ export default function CorpLoginPageContent() {
 
       if (data.user?.organizationId) {
         localStorage.setItem("organizationId", data.user.organizationId);
+       // localStorage.setItem("organizationName", data.user.organization.name);
+        if (data.user.organization?.name) {
+          localStorage.setItem("organizationName", data.user.organization.name);
+        }
       }
+
+      //const organizationName = data.user.organization.name;
+
+      console.log(localStorage.getItem("organizationName"));
 
       router.replace(redirectUrl);
     } catch (error) {
@@ -235,7 +252,7 @@ export default function CorpLoginPageContent() {
               Corporate portal
             </p>
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-[#101828]">
-              Organization Login
+              Bank Login
             </h2>
             <p className="mt-3 text-sm leading-6 text-slate-500">
               Sign in with your organization account to access statements

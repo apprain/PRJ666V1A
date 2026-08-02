@@ -243,7 +243,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 font-semibold text-slate-600 transition hover:text-[#29953a]"
               >
                 <Icon name="corporate" className="h-4 w-4" />
-                Organization Registration
+                Bank Registration
               </Link>
               
               <Link
@@ -251,7 +251,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 font-semibold text-slate-600 transition hover:text-[#29953a]"
               >
                 <Icon name="guidelines" className="h-4 w-4" />
-                Organization Login
+                Bank Login
               </Link>
             </div>
 
