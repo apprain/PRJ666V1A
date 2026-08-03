@@ -15,7 +15,8 @@ export default function Home() {
     },
     {
       title: "Registration",
-      href: kycUrl,
+      href: "/register",
+      //href: kycUrl,
       desc: "Create individual account",
       icon: "👤",
     },

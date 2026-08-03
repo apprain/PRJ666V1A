@@ -12,6 +12,10 @@ sudo docker compose down --remove-orphans
 sudo docker compose build --no-cache
 sudo docker compose up -d
 
+docker compose down --remove-orphans
+docker compose build --no-cache
+docker compose up -d
+
 cd /opt/apprain/repos/kyc/backend/
 sudo docker compose up -d
 
@@ -288,6 +292,11 @@ VM Setup Azure: (Manika Account):
   @ppRain#162341#2026
 
 ###############################  Desklocator ##
+
+	Name: DeskLocator
+	Client ID: app_9c70b807f3df9e55b29b40b4
+	Client Secret: secret_b754c2685f37fe7d8441b676e645fe440901cd1ce0a93978
+
     cd Backend : 3000
 	npm install
 	npm run start:dev

@@ -61,13 +61,13 @@ export class AuthService {
       };
     }
 
-    const existingMobile = await this.usersService.findByMobile(mobile);
+    // const existingMobile = await this.usersService.findByMobile(mobile);
 
-    if (existingMobile) {
-      return {
-        message: 'Mobile already exists',
-      };
-    }
+    // if (existingMobile) {
+    //   return {
+    //     message: 'Mobile already exists',
+    //   };
+    // }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

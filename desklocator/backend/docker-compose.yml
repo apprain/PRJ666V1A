@@ -1,34 +1,49 @@
-name: trustledger-backend
+name: task-manager
 
 services:
   postgres:
-    image: postgres:16
-    container_name: trustledger-postgres
+    image: postgres:16-alpine
+    container_name: task-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_DB: taskdb
     volumes:
-      - trustledger_postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taskdb"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   backend:
-    build: .
-    container_name: trustledger-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-backend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: postgres
+      DB_PASSWORD: "123456"
+      DB_NAME: taskdb
+      PORT: "3000"
+
+      JWT_SECRET: "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET"
+      JWT_EXPIRES_IN: "1h"
+
+      KYC_API_URL: "https://kyc.apprain.ca"
+      KYC_CLIENT_ID: "app_28e03c1868d8cc8adc129e6a"
+      KYC_CLIENT_SECRET: "CHANGE_THIS_KYC_CLIENT_SECRET"
+      KYC_CALLBACK_URL: "http://trustledger.apprain.ca/kyc/callback"
     depends_on:
       postgres:
         condition: service_healthy
-    env_file:
-      - .env
 
 volumes:
-  trustledger_postgres_data:
-    name: trustledger-postgres-data
+  postgres_data:
+    name: task-manager-postgres-data
